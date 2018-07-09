@@ -1,0 +1,161 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="include">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="test">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="include\redis_cpp">
+      <UniqueIdentifier>{86c3f8b1-fe31-4b86-bd8c-d2553f495715}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\redis_cpp\detail">
+      <UniqueIdentifier>{32931b15-4e1c-4c41-83ef-37fd5b295def}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\redis_cpp\internal">
+      <UniqueIdentifier>{ae15d2a1-610b-4a9a-ad90-8e406ce4e2e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\redis_cpp\detail\async">
+      <UniqueIdentifier>{ac5410ef-c894-45df-88f6-7d63dc6a22e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\redis_cpp\detail\sentinel">
+      <UniqueIdentifier>{672e1664-1e90-4d71-9229-202100215b83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\redis_cpp\detail\sync">
+      <UniqueIdentifier>{3c33c872-d7b5-4f6a-88d1-214de8533baf}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="redis_test.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\redis_cpp\redis_operator.hpp">
+      <Filter>include\redis_cpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\redis_reply.hpp">
+      <Filter>include\redis_cpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\redis_uri.hpp">
+      <Filter>include\redis_cpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\internal\logger_handler.hpp">
+      <Filter>include\redis_cpp\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\async\redis_async_operator.hpp">
+      <Filter>include\redis_cpp\detail\async</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\redis_cluster.hpp">
+      <Filter>include\redis_cpp\detail\sync</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\redis_command_executor.hpp">
+      <Filter>include\redis_cpp\detail\sync</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\redis_connection.hpp">
+      <Filter>include\redis_cpp\detail\sync</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\redis_hash.hpp">
+      <Filter>include\redis_cpp\detail\sync</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\redis_key.hpp">
+      <Filter>include\redis_cpp\detail\sync</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\redis_list.hpp">
+      <Filter>include\redis_cpp\detail\sync</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\redis_pubsub.hpp">
+      <Filter>include\redis_cpp\detail\sync</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\redis_server.hpp">
+      <Filter>include\redis_cpp\detail\sync</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\redis_set.hpp">
+      <Filter>include\redis_cpp\detail\sync</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\redis_string.hpp">
+      <Filter>include\redis_cpp\detail\sync</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\redis_sync_operator.hpp">
+      <Filter>include\redis_cpp\detail\sync</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\redis_zset.hpp">
+      <Filter>include\redis_cpp\detail\sync</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sentinel\base_sentinel_client.hpp">
+      <Filter>include\redis_cpp\detail\sentinel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sentinel\sentinel_client_pool.hpp">
+      <Filter>include\redis_cpp\detail\sentinel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\redis_buffer.hpp">
+      <Filter>include\redis_cpp\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\redis_command.hpp">
+      <Filter>include\redis_cpp\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\redis_parser.hpp">
+      <Filter>include\redis_cpp\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\tcp_channel.hpp">
+      <Filter>include\redis_cpp\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\tcp_channel_event.hpp">
+      <Filter>include\redis_cpp\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\config.hpp">
+      <Filter>include\redis_cpp\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\base_sync_client.hpp">
+      <Filter>include\redis_cpp\detail\sync</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\cluster_sync_client.hpp">
+      <Filter>include\redis_cpp\detail\sync</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\sentinel_sync_client.hpp">
+      <Filter>include\redis_cpp\detail\sync</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\standalone_sync_client.hpp">
+      <Filter>include\redis_cpp\detail\sync</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\standalone_sync_client_pool.hpp">
+      <Filter>include\redis_cpp\detail\sync</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\async\base_async_client.hpp">
+      <Filter>include\redis_cpp\detail\async</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\async\cluster_async_client.hpp">
+      <Filter>include\redis_cpp\detail\async</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\async\sentinel_async_client.hpp">
+      <Filter>include\redis_cpp\detail\async</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\base_standalone_sync_client_pool.hpp">
+      <Filter>include\redis_cpp\detail\sync</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\redis_slot_range.hpp">
+      <Filter>include\redis_cpp\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\redis_reply_util.hpp">
+      <Filter>include\redis_cpp\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\redis_cluster_slots.hpp">
+      <Filter>include\redis_cpp\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\redis_slot.hpp">
+      <Filter>include\redis_cpp\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\async\standalone_async_client.hpp">
+      <Filter>include\redis_cpp\detail\async</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sentinel\sentinel_client.hpp">
+      <Filter>include\redis_cpp\detail\sentinel</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

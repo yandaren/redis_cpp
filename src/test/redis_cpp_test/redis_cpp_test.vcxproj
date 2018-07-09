@@ -1,0 +1,121 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{BC1D8423-A599-4840-9D3D-E8146FECC582}</ProjectGuid>
+    <RootNamespace>redis_cpp_test</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\;$(SolutionDir)..\..\3rd\asio-asio-1-11-0\asio\include;$(SolutionDir)..\..\;$(SolutionDir)..\..\include</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\;$(SolutionDir)..\..\3rd\asio-asio-1-11-0\asio\include;$(SolutionDir)..\..\;$(SolutionDir)..\..\include</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="redis_test.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\redis_cpp.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\async\base_async_client.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\async\cluster_async_client.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\async\redis_async_operator.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\async\sentinel_async_client.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\async\standalone_async_client.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\config.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\redis_buffer.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\redis_cluster_slots.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\redis_command.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\redis_parser.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\redis_reply_util.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\redis_slot.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\redis_slot_range.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sentinel\base_sentinel_client.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sentinel\sentinel_client.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sentinel\sentinel_client_pool.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\base_standalone_sync_client_pool.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\base_sync_client.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\cluster_sync_client.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\redis_cluster.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\redis_command_executor.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\redis_connection.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\redis_hash.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\redis_key.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\redis_list.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\redis_pubsub.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\redis_server.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\redis_set.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\redis_string.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\redis_sync_operator.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\redis_zset.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\sentinel_sync_client.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\standalone_sync_client.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\standalone_sync_client_pool.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\tcp_channel.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\tcp_channel_event.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\internal\logger_handler.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\redis_operator.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\redis_reply.hpp" />
+    <ClInclude Include="..\..\..\include\redis_cpp\redis_uri.hpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
