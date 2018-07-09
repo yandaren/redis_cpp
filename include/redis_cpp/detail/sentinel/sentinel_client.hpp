@@ -189,7 +189,7 @@ protected:
         }
 
         std::vector<std::string> splits;
-        ydk::str::string_splits(message.c_str(), " ", splits);
+        utility::str::string_splits(message.c_str(), " ", splits);
         if (splits.size() != 5)
         {
             rds_log_error("sentinel_client[%p] uri[%s] switchmaster_channel_msg, but message[%s] not valid.",

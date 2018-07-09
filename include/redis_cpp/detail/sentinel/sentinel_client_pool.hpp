@@ -44,7 +44,7 @@ public:
 
         std::vector<std::pair<std::string, int32_t>> srv_list;
         std::vector<std::string> splits;
-        ydk::str::string_splits(sentinel_srv_list, ";", splits);
+        utility::str::string_splits(sentinel_srv_list, ";", splits);
         if (splits.empty()){
             rds_log_error("sentinel_client_pool[%p], sentinel_srv_list[%s] invalid.",
                 this, sentinel_srv_list);
@@ -53,7 +53,7 @@ public:
         for (auto& split : splits)
         {
             std::vector<std::string> spts;
-            ydk::str::string_splits(split.c_str(), ":", spts);
+            utility::str::string_splits(split.c_str(), ":", spts);
             if (spts.size() != 2){
                 rds_log_error("sentinel_client_pool[%p], srv_url[%s] invalid, sentinel_srv_list[%s].",
                     this, split.c_str(), sentinel_srv_list);
