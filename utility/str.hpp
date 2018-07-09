@@ -13,7 +13,7 @@
 #include <string>
 #include <sstream>
 
-namespace ydk
+namespace utility
 {
 namespace str
 {

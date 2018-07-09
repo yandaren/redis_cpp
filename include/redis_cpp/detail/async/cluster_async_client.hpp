@@ -48,7 +48,7 @@ public:
         other_thread_pool_.start();
 
         std::vector<std::string> uri_list;
-        ydk::str::string_splits(uri, ";", uri_list);
+        utility::str::string_splits(uri, ";", uri_list);
         if (uri_list.empty()){
             rds_log_error("cluster_async_client[%p] redis_uri[%s] parse failed.",
                 this, uri);
