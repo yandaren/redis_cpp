@@ -1,1 +1,1 @@
-a c++ redis client based on asio
+a c++ redis client based on asio, need c++ 11 support
