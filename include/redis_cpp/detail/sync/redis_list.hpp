@@ -44,7 +44,7 @@ public:
         cmd.add_param(key);
         cmd.add_param(time_out);
 
-        hash_slot(key.c_str(), key.size());
+        hash_slot(key.c_str(), (int32_t)key.size());
 
         return get_string_pair_result(cmd, result);
     }
@@ -89,7 +89,7 @@ public:
         cmd.add_param(key);
         cmd.add_param(time_out);
 
-        hash_slot(key.c_str(), key.size());
+        hash_slot(key.c_str(), (int32_t)key.size());
 
         return get_string_pair_result(cmd, result);
     }

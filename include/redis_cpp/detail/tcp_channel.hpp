@@ -134,7 +134,7 @@ public:
     int32_t read(redis_buffer& buffer)
     {
         asio::error_code err;
-        std::size_t len = socket_.read_some(asio::buffer(recv_buffer, max_receiver_buffer_len), err);
+        int32_t len = (int32_t)socket_.read_some(asio::buffer(recv_buffer, max_receiver_buffer_len), err);
         if (!err){
             buffer = redis_buffer(recv_buffer, len);
             return len;
@@ -146,7 +146,7 @@ public:
 
     int32_t read(){
         asio::error_code err;
-        std::size_t len = socket_.read_some(asio::buffer(recv_buffer, max_receiver_buffer_len), err);
+        int32_t len = (int32_t)socket_.read_some(asio::buffer(recv_buffer, max_receiver_buffer_len), err);
         if (!err){
             return len;
         }
@@ -317,7 +317,7 @@ protected:
         }
 
         if (!shutdown_ && event_handler_)
-            event_handler_->message_received(remote_ip_.c_str(), remote_port_, dst, length);
+            event_handler_->message_received(remote_ip_.c_str(), remote_port_, dst, (int32_t)length);
 
         start_receive();
     }

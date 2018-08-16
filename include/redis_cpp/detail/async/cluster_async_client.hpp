@@ -172,7 +172,7 @@ public:
     * @brief get client by channel name
     */
     standalone_async_client*   get_async_client(const std::string& channel_name){
-        int32_t slot_id = redis_slot::slot(channel_name.c_str(), channel_name.size());
+        int32_t slot_id = redis_slot::slot(channel_name.c_str(), (int32_t)channel_name.size());
 
         std::lock_guard<std::mutex> locker(client_map_mtx_);
         return get_client_by_slot(slot_id);

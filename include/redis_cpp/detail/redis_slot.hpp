@@ -28,7 +28,7 @@ namespace redis_slot
     }
 
     static uint16_t slot(const char* key){
-        return slot(key, strlen(key));
+        return slot(key, (int32_t)strlen(key));
     }
 }
 }
