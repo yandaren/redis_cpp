@@ -19,12 +19,16 @@ namespace redis_cpp
 {
 namespace detail
 {
-#define max_buffer_len 1024 * 1024 * 512
 
 class redis_buffer;
 typedef std::shared_ptr<redis_buffer> redis_buffer_ptr;
 class redis_buffer
 {
+public:
+    enum {
+        max_buffer_size = 1024 * 1024 * 512
+    };
+
 protected:
     char*   data_;
     int32_t capacity_;
@@ -305,12 +309,12 @@ protected:
         if (!is_auto_extend_)
             return false;
 
-        uint32_t new_capacity = (std::min<uint32_t>)(capacity_ * 2, max_buffer_len);
+        uint32_t new_capacity = (std::min<uint32_t>)(capacity_ * 2, max_buffer_size);
         new_capacity = (std::max<uint32_t>)(new_capacity, writer_index_ + size);
 
-        if (new_capacity > max_buffer_len){
+        if (new_capacity > max_buffer_size){
             char error[128];
-            sprintf(error, "exceeding the maximum allowable memory [%dB].", max_buffer_len);
+            sprintf(error, "exceeding the maximum allowable memory [%dB].", max_buffer_size);
             throw std::runtime_error(error);
             return false;
         }
