@@ -141,7 +141,7 @@ public:
     }
 
     void push_bytes(char* message){
-        push_bytes(message, strlen(message));
+        push_bytes(message, (int32_t)strlen(message));
     }
 
     void push_bytes(char* message, int32_t size){

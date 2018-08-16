@@ -145,8 +145,8 @@ public:
     /** do command */
     void    do_command(const redis_command& cmd, const reply_handler& handler){
         std::string str(cmd.to_string());
-        redis_buffer_ptr buffer = redis_buffer::create(str.size(), true);
-        buffer->write_bytes(str.data(), str.length());
+        redis_buffer_ptr buffer = redis_buffer::create((int32_t)str.size(), true);
+        buffer->write_bytes(str.data(), (int32_t)str.length());
 
         std::lock_guard<std::mutex> locker(mtx_);
         if (connection_->send(buffer)){
