@@ -659,7 +659,7 @@ public:
     * @param bit[ 0 or 1]
     * @return the old bit of the offset
     */
-    int32_t setbit(const char* key, int32_t offset, bool bit)
+    int32_t (setbit)(const char* key, int32_t offset, bool bit)
     {
         redis_command cmd("setbit");
 

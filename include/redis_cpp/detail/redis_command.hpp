@@ -12,7 +12,7 @@
 #define __ydk_rediscpp_detail_redis_command_hpp__
 
 #include <redis_cpp/detail/config.hpp>
-#include <strstream>
+#include <sstream>
 #include <vector>
 
 namespace redis_cpp

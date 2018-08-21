@@ -51,7 +51,8 @@ class event_publisher
 {
 protected:
     std::mutex  subscribers_mtx_;
-    std::unordered_map<event_num, std::unordered_set<event_subscriber*>> event_subscriber_set_;
+	/* <event_num, std::unordered_set<event_subscriber*>> */
+    std::unordered_map<int32_t, std::unordered_set<event_subscriber*>> event_subscriber_set_;
 
 public:
     event_publisher(){
@@ -69,7 +70,7 @@ public:
     virtual void    add_event_subscriber(event_num e, event_subscriber* sub)
     {
         std::lock_guard<std::mutex> locker(subscribers_mtx_);
-        event_subscriber_set_[e].insert(sub);
+        event_subscriber_set_[int32_t(e)].insert(sub);
     }
 
     /**
@@ -78,7 +79,7 @@ public:
     virtual void    remove_event_subscriber(event_num e, event_subscriber* sub)
     {
         std::lock_guard<std::mutex> locker(subscribers_mtx_);
-        auto iter = event_subscriber_set_.find(e);
+        auto iter = event_subscriber_set_.find(int32_t(e));
         if (iter != event_subscriber_set_.end())
         {
             iter->second.erase(sub);
@@ -89,7 +90,7 @@ public:
     void    publish_event(event_num e, void* content)
     {
         std::lock_guard<std::mutex> locker(subscribers_mtx_);
-        auto iter = event_subscriber_set_.find(e);
+        auto iter = event_subscriber_set_.find(int32_t(e));
         if (iter != event_subscriber_set_.end())
         {
             for (auto subsciber : iter->second)

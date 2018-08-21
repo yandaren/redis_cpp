@@ -169,7 +169,7 @@ namespace utility
         template<typename type>
         typename std::decay<type>::type& get()
         {
-            using u_type = std::decay<type>::type;
+            using u_type = typename std::decay<type>::type;
             if (!is<u_type>())
             {
                 throw std::bad_cast();
