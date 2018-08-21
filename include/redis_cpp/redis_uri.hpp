@@ -13,7 +13,7 @@
 
 #include <redis_cpp/detail/config.hpp>
 #include <cstdint>
-#include <strstream>
+#include <sstream>
 
 namespace redis_cpp
 {

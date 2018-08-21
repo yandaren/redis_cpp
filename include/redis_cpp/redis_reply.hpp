@@ -12,6 +12,7 @@
 #define __ydk_rediscpp_redis_reply_hpp__
 
 #include <utility/variant/variant.hpp>
+#include <string.h>
 #include <cstdint>
 #include <vector>
 #include <memory>
@@ -19,6 +20,9 @@
 #if defined(_WIN32)
 #define stricmp _stricmp
 #define strnicmp _strnicmp
+#elif defined(__linux__)
+#define stricmp strcasecmp
+#define strnicmp strncasecmp
 #endif
 
 namespace redis_cpp
@@ -63,8 +67,14 @@ public:
     redis_reply(std::string& s) : content_(s){
     }
 
+	redis_reply(std::string&& s) : content_(s){
+	}
+
     redis_reply(redis_reply_arr& arr) : content_(arr){
     }
+
+	redis_reply(redis_reply_arr&& arr) : content_(arr){
+	}
 
 public:
     template<class type>
