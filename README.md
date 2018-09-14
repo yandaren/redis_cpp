@@ -2,6 +2,9 @@ a c++ redis client based on asio, need c++ 11 support
 ***
 ### samples
 
+### 1. custom log handler
+我们可以自定义redis_cpp的内部日志处理函数以及设置内部日志级别, 默认是输出到控制台
+
 ```
 #include <iostream>
 #include <strstream>
@@ -46,246 +49,148 @@ void redis_cpp_log_handler_1(redis_cpp::internal::rds_log_level log_level, const
     printf("--------[%s][%s][rds] %s\n", date, loglvl_str(log_level), data);
 }
 
-void log_handler_test()
+int main()
 {
-    using namespace redis_cpp::internal;
-    logger_initialize();
-    rds_log_info("hello, %d", 10);
-    rds_log_debug("debug log, %s", "dg");
-    set_log_handler(custom_log_handler);
-    rds_log_info("customg log test");
-    set_log_lvl(rds_log_level_error);
-    rds_log_info("the msg shoul not been display");
+    std::cout << "redis_cpp test." << std::endl;
+
+	// set the internal loggel level
+	redis_cpp::set_log_lvl(redis_cpp::internal::rds_log_level_debug);
+	// set the internal log handler
+    redis_cpp::set_log_handler(redis_cpp_log_handler_1);
+
+	return 0
 }
 
-void redis_cpp_initialize_test()
-{
-    redis_cpp::initialize();
-    rds_log_info("hello, %d", 10);
-    rds_log_debug("debug log, %s", "dg");
-    redis_cpp::set_log_handler(custom_log_handler);
-    rds_log_info("customg log test");
-    redis_cpp::set_log_lvl(redis_cpp::internal::rds_log_level_error);
-    rds_log_info("the msg shoul not been display");
-}
+```
 
-void redis_reply_test(){
-    redis_cpp::redis_reply rp1;
-    std::cout << std::boolalpha;
-    std::cout << "rp1 is null [" << rp1.is<redis_cpp::nil_reply>() << "] " << std::endl;
-    redis_cpp::error_reply error("clust is down!");
-    redis_cpp::redis_reply rp2(error);
-    std::cout << "rp2 is error [" << rp2.is<redis_cpp::error_reply>() << "] " << std::endl;
-    if (rp2.is<redis_cpp::error_reply>()){
-        redis_cpp::error_reply& error = rp2.get<redis_cpp::error_reply>();
-        std::cout << "rp2 error msg[" << error.msg << "]" << std::endl;
-    }
-}
+### 2. redis stanalone, sentinel, cluster 三种模式下的operator
 
-std::string get_prefix_of_dep(int32_t dep){
-    std::stringstream ss;
-    for (int32_t i = 0; i < dep; ++i){
-        ss << "  ";
-    }
-    return std::move(ss.str());
-}
-
-void print_reply(redis_cpp::redis_reply* reply, int32_t dep, std::vector<int32_t>& up_arry_index){
-    using namespace redis_cpp;
-    std::string prefix(std::move(get_prefix_of_dep(dep)));
-    if (reply->is<nil_reply>()){
-        std::cout << prefix << "nil" << "\n";
-    }
-    else if (reply->is<error_reply>()){
-        std::cout << prefix << "error(" << reply->get<error_reply>().msg << ")" << "\n";
-    }
-    else if (reply->is<int32_t>()){
-        std::cout << prefix << "integer: " << reply->get<int32_t>() << "\n";
-    }
-    else if (reply->is<std::string>()){
-        std::cout << prefix << reply->get<std::string>() << "\n";
-    }
-    else if (reply->is <redis_reply_arr>()){
-        redis_reply_arr& arry = reply->get<redis_reply_arr>();
-        for (std::size_t i = 0; i < arry.size(); ++i){
-            std::cout << prefix;
-            
-            for (auto up_index : up_arry_index){
-                std::cout << up_index << ".";
-            }
-            std::cout << i + 1 << ") ";
-            if (i == 0)
-                std::cout << arry.size();
-            std::cout << "\n";
-
-            std::vector<int32_t> up_arry_index_new = up_arry_index;
-            up_arry_index_new.push_back(i + 1);
-            print_reply(&arry[i], dep + 1, up_arry_index_new);
-        }
-
-        if (arry.empty()){
-            std::cout << prefix << "empty map or list" << "\n";
-        }
-    }
-}
-
-void redis_parser_test(){
-    // status test
-    using namespace redis_cpp;
-    using namespace redis_cpp::detail;
-    redis_parser parser;
-    parser.push_bytes("+OK\r\n");
-    parse_result r = parser.parse();
-    if (r != redis_ok){
-        printf("parse [+OK\\r\\n] failed.\n");
-    }
-    else{
-        redis_reply* reply = parser.get_reply();
-        printf("reply is [%s]\n", reply->get<std::string>().c_str());
-    }
-
-    parser.push_bytes("+PONG\r\n");
-    r = parser.parse();
-    if (r != redis_ok){
-        printf("parse [+PONG\\r\\n] failed.\n");
-    }
-    else{
-        redis_reply* reply = parser.get_reply();
-        printf("reply is [%s]\n", reply->get<std::string>().c_str());
-    }
-
-    // error test
-    parser.push_bytes("-cluster is down!!!\r\n");
-    r = parser.parse();
-    if (r != redis_ok){
-        printf("parse [-cluster is down!!!\\r\\n] failed.\n");
-    }
-    else{
-        redis_reply* reply = parser.get_reply();
-        printf("error reply is [%s]\n", reply->get<error_reply>().msg.c_str());
-    }
-
-    // integer test
-    parser.push_bytes(":12456880\r\n");
-    r = parser.parse();
-    if (r != redis_ok){
-        printf("parse [:12456880\\r\\n] failed.\n");
-    }
-    else{
-        redis_reply* reply = parser.get_reply();
-        printf("integer reply is [%d]\n", reply->get<int32_t>());
-    }
-
-    // bulk string test
-    parser.push_bytes("$6\r\nfoobar\r\n");
-    r = parser.parse();
-    if (r != redis_ok){
-        printf("parse [$6\\r\\nfoobar\\r\\n] failed.\n");
-    }
-    else{
-        redis_reply* reply = parser.get_reply();
-        printf("bulk reply is [%s]\n", reply->get<std::string>().c_str());
-    }
-
-    parser.push_bytes("$0\r\n\r\n");
-    r = parser.parse();
-    if (r != redis_ok){
-        printf("parse [$0\\r\\n\\r\\n] failed.\n");
-    }
-    else{
-        redis_reply* reply = parser.get_reply();
-        printf("bulk reply is [%s]\n", reply->get<std::string>().c_str());
-    }
-
-    parser.push_bytes("$-1\r\n");
-    r = parser.parse();
-    if (r != redis_ok){
-        printf("parse [$-1\\r\\n] failed.\n");
-    }
-    else{
-        redis_reply* reply = parser.get_reply();
-        nil_reply& nil = reply->get<nil_reply>();
-        printf("bulk reply is nil[%d]\n", reply->is<nil_reply>());
-    }
-
-    parser.push_bytes("$25\r\nfuzuotao");
-    r = parser.parse();
-    if (r != redis_ok){
-        printf("parse [$20\\r\\nfuzuotao] failed, r: %d\n", r);
-    }
-    parser.push_bytes(",you are the best\r\n");
-    r = parser.parse();
-    if (r != redis_ok){
-        printf("parse [$20\\r\\nfuzuotao,you are the best\\r\\n] failed, r: %d\n", r);
-    }
-    else{
-        redis_reply* reply = parser.get_reply();
-        printf("bulk reply is [%s]\n", reply->get<std::string>().c_str());
-    }
-
-    // arry test
-    parser.push_bytes("*5\r\n"
-                      "*3\r\n"
-                      "+OK\r\n"
-                      "-cluster is down\r\n"
-                      "*2\r\n"
-                      "+PONG\r\n"
-                      "*2\r\n"
-                      "-auth required\r\n"
-                      "$4\r\n"
-                      "fuck\r\n"
-                      "$8\r\n"
-                      "fuzuotao\r\n"
-                      "*-1\r\n"
-                      "*2\r\n"
-                      "+OK\r\n"
-                      "-param eror\r\n"
-                      "*0\r\n");
-
-    r = parser.parse();
-    if (r != redis_ok){
-        printf("parse [*5\\r\\n"
-                      "*3\\r\\n"
-                      "+OK\\r\\n"
-                      "-cluster is down\\r\\n"
-                      "*2\\r\\n"
-                      "+PONG\\r\\n"
-                      "*2\\r\\n"
-                      "-auth required\\r\\n"
-                      "$4\\r\\n"
-                      "fuck\\r\\n"
-                      "$8\\r\\n"
-                      "fuzuotao\\r\\n"
-                      "*-1\\r\\n] failed.\n"
-                      "*2\\r\\n"
-                      "+OK\\r\\n"
-                      "-param eror\\r\\n"
-                      "*0\\r\\n");
-    }
-    else{
-        redis_reply* reply = parser.get_reply();
-        redis_reply_arr& arr = reply->get<redis_reply_arr>();
-
-        std::vector<int32_t> up_index;
-        print_reply(reply, 0, up_index);
-    }
-}
-
-
-void standalone_syncclient_test(){
+- 单例模式(standalone)
+  - 单链接
+    ```
     using namespace redis_cpp;
     using namespace redis_cpp::detail;
 
-    utility::asio_base::thread_pool pool(1);
+    utility::asio_base::thread_pool pool(2);
     pool.start();
-
-    std::string redis_uri = "redis://foobared@127.0.0.1:6379/1";
     standalone_sync_client* sync_client = new standalone_sync_client(pool.io_service(), redis_uri.c_str());
     sync_client->connect();
+	
+	// operator
+    redis_sync_operator client(sync_client);
 
-    pool.wait_for_stop();
-}
+    // set foo bar
+    client.set("foo", "bar");
+    
+	// get foo
+    std::string res_foo;
+    if (client.get("foo", res_foo))
+    {
+        printf("get foo: %s\n", res_foo.c_str());
+    }
+    else
+    {
+        printf("get foo: failed\n");
+    }
+    ```
+  - 连接池
+    ```
+    using namespace redis_cpp;
+    using namespace redis_cpp::detail;
 
+    utility::asio_base::thread_pool pool(2);
+    pool.start();
+	standalone_sync_client_pool client_pool(redis_uri.c_str(), 1, 2, &pool);
+    base_sync_client* sync_client = &client_pool;
+	
+	// operator
+    redis_sync_operator client(sync_client);
+
+    // set foo bar
+    client.set("foo", "bar");
+    
+	// get foo
+    std::string res_foo;
+    if (client.get("foo", res_foo))
+    {
+        printf("get foo: %s\n", res_foo.c_str());
+    }
+    else
+    {
+        printf("get foo: failed\n");
+    }
+    ```
+- 哨兵模式(sentinel)
+  ```
+	using namespace redis_cpp;
+	using namespace redis_cpp::detail;
+	
+	std::string master_name = "test_master";
+	const char* srv_list = "127.0.0.1:26379";
+	// sentinel client
+	sentinel_client_pool_ptr client_pool = sentinel_client_pool::create(srv_list);
+	client_pool->start();
+	
+	std::string redis_uri_str = "redis://foobared@127.0.0.1:6381/1";
+	redis_uri uri(redis_uri_str.c_str());
+	
+	std::pair<std::string, int32_t> address;
+	if (client_pool->get_master_address_by_name(master_name.c_str(), address))
+	{
+	    uri.set_ip(address.first.c_str());
+	    uri.set_port(address.second);
+	
+	    printf("master_name[%s]'s master address is [%s:%d].\n", 
+			master_name.c_str(), address.first.c_str(), address.second);
+	
+	    redis_uri_str = uri.to_string();
+	}
+	else
+	{
+	    printf("try get master_name[%s]' master address failed.\n", master_name.c_str());
+	}
+	
+	// sentinal sync client
+	sentinel_sync_client* client = new sentinel_sync_client("acmaster", redis_uri_str.c_str(), 1, 2);
+	client->set_sentinel_client_pool(client_pool);
+	redis_sync_operator redis_op(client);
+
+	// set foo bar
+    client.set("foo", "bar");
+    
+  ```
+- 集群模式
+  ```
+    using namespace redis_cpp;
+    using namespace redis_cpp::detail;
+
+    utility::asio_base::thread_pool pool(2);
+    pool.start();
+    std::string redis_uri_list = "redis://foobared@127.0.0.1:7000;redis://foobared@127.0.0.1:7001;redis://foobared@127.0.0.1:7002";
+    cluster_sync_client cluster(redis_uri_list.c_str(), 1, 2);
+    base_sync_client* sync_client = &cluster;
+	
+	// operator
+    redis_sync_operator client(sync_client);
+
+    // set foo bar
+    client.set("foo", "bar");
+    
+	// get foo
+    std::string res_foo;
+    if (client.get("foo", res_foo))
+    {
+        printf("get foo: %s\n", res_foo.c_str());
+    }
+    else
+    {
+        printf("get foo: failed\n");
+    }
+  ```
+
+### 2. redis key 相关的操作的接口使用
+
+```
 void redis_key_test(){
     using namespace redis_cpp;
     using namespace redis_cpp::detail;
@@ -412,15 +317,11 @@ void redis_key_test(){
     //sync_client->destroy();
 }
 
-void printString(const std::string& s)
-{
-    for (std::size_t i = 0; i < s.size(); ++i)
-    {
-        printf("%c", s[i]);
-    }
-    printf("\r\n");
-}
+```
 
+### 3. redis string 相关操作的接口使用
+
+```
 void redis_string_test(){
 
     using namespace redis_cpp;
@@ -584,7 +485,10 @@ void redis_string_test(){
 
     //sync_client->destroy();
 }
+```
 
+### 4. redis list 相关操作
+```
 void redis_list_test(){
 
     using namespace redis_cpp;
@@ -807,7 +711,10 @@ void redis_list_test(){
 
     //sync_client->destroy();
 }
+```
 
+### 5. redis hash 相关操作
+```
 void redis_hash_test(){
     using namespace redis_cpp;
     using namespace redis_cpp::detail;
@@ -948,6 +855,11 @@ void redis_hash_test(){
     //sync_client->destroy();
 }
 
+```
+
+### 6. redis set 相关操作
+
+```
 void redis_set_test(){
     using namespace redis_cpp;
     using namespace redis_cpp::detail;
@@ -1126,7 +1038,10 @@ void redis_set_test(){
 
     //sync_client->destroy();
 }
+```
 
+### 7. redis zset 相关操作
+```
 void redis_zset_test(){
     using namespace redis_cpp;
     using namespace redis_cpp::detail;
@@ -1402,504 +1317,309 @@ void redis_zset_test(){
 
     //sync_client->destroy();
 }
-
-void redis_pubsub_test(){
-    using namespace redis_cpp;
-    using namespace redis_cpp::detail;
-
-    utility::asio_base::thread_pool pool(2);
-    pool.start();
-
-    std::string redis_uri = "redis://foobared@127.0.0.1:6379/1";
-
-#if defined(__standalone_sync_client_test__)
-    standalone_sync_client* sync_client = new standalone_sync_client(pool.io_service(), redis_uri.c_str());
-    sync_client->connect();
-#elif defined(__standalone_sync_client_pool_test__)
-    standalone_sync_client_pool client_pool(redis_uri.c_str(), 1, 2, &pool);
-    base_sync_client* sync_client = &client_pool;
-#elif defined(__cluster_sync_client_test__)
-    std::string redis_uri_list = "redis://foobared@127.0.0.1:7000;redis://foobared@127.0.0.1:7001;redis://foobared@127.0.0.1:7002";
-    cluster_sync_client cluster(redis_uri_list.c_str(), 1, 2);
-    base_sync_client* sync_client = &cluster;
-#endif
-
-    redis_sync_operator client(sync_client);
-
-    std::string cmd;
-    while (true)
-    {
-        std::cout << ">";
-
-        std::cin >> cmd;
-
-        if (cmd == "pubsub")
-        {
-            std::string p;
-            std::cin >> p;
-
-            if (p == "numsub")
-            {
-                std::string channel_name;
-                int32_t sub_count;
-
-                std::cin >> channel_name;
-
-                client.pubsub_numsub(channel_name.c_str(), sub_count);
-
-                printf("channel_name:%s, subed_count: %d\n", channel_name.c_str(), sub_count);
-            }
-            else if (p == "channels")
-            {
-                std::vector<std::string> out_result;
-                client.pubsub_channels(out_result);
-
-                printf("current active channels count:%d\n", out_result.size());
-                for (std::size_t i = 0; i < out_result.size(); ++i)
-                {
-                    printf("%d) %s\n", i + 1, out_result[i].c_str());
-                }
-            }
-            else if (p == "numpat")
-            {
-                int32_t count = client.pubsub_numpat();
-
-                printf("numpat: %d\n", count);
-            }
-
-        }
-        else if (cmd == "publish")
-        {
-            std::string channel_name;
-            std::string message;
-
-            std::cin >> channel_name;
-            std::cin >> message;
-
-            int32_t recv_count = client.publish(channel_name.c_str(), message.c_str());
-
-            printf("recved_count: %d\n", recv_count);
-        }
-    }
-
-    system("pause");
-
-    pool.wait_for_stop();
-
-    //sync_client->destroy();
-}
-
-void redis_server_cmd_test(){
-
-    using namespace redis_cpp;
-    using namespace redis_cpp::detail;
-
-    utility::asio_base::thread_pool pool(2);
-    pool.start();
-
-    std::string redis_uri = "redis://foobared@127.0.0.1:6379/1";
-
-#if defined(__standalone_sync_client_test__)
-    standalone_sync_client* sync_client = new standalone_sync_client(pool.io_service(), redis_uri.c_str());
-    sync_client->connect();
-#elif defined(__standalone_sync_client_pool_test__)
-    standalone_sync_client_pool client_pool(redis_uri.c_str(), 1, 2, &pool);
-    base_sync_client* sync_client = &client_pool;
-#elif defined(__cluster_sync_client_test__)
-    std::string redis_uri_list = "redis://foobared@127.0.0.1:7000;redis://foobared@127.0.0.1:7001;redis://foobared@127.0.0.1:7002";
-    cluster_sync_client cluster(redis_uri_list.c_str(), 1, 2);
-    base_sync_client* sync_client = &cluster;
-#endif
-
-    redis_sync_operator client(sync_client);
-
-    while (true)
-    {
-        //system("pause");
-
-        int64_t time_server;
-        int64_t microseconds;
-
-        if (client.time(&time_server, &microseconds))
-        {
-            time_t now = time(NULL);
-            printf("time: %lld, microseconds: %lld, now[%d]\n",
-                time_server, microseconds, (int32_t)now);
-        }
-        else
-        {
-            printf("get server time failed\n");
-        }
-
-        node_role_info role_info;
-
-        if (client.role(role_info))
-        {
-            printf("role: %s\n", role_info.role.c_str());
-
-            if (role_info.role == "master")
-            {
-                std::shared_ptr<master_node_info> master = role_info.master;
-
-                printf("repli_offset: %d\n", master->replication_offset);
-                printf("slave list, count:%d\n", master->slave_list.size());
-                for (std::size_t i = 0; i < master->slave_list.size(); ++i)
-                {
-                    slave_base_info& slave_info = master->slave_list[i];
-                    printf("------------------------------------------\n");
-                    printf("ip: %s\n", slave_info.ip.c_str());
-                    printf("port: %d\n", slave_info.port);
-                    printf("replic_offset: %d\n", slave_info.replication_offset);
-
-                    printf("\n");
-                }
-            }
-            else if (role_info.role == "slave")
-            {
-                std::shared_ptr<slave_node_info> slave = role_info.slave;
-
-                printf("master_ip: %s\n", slave->master_ip.c_str());
-                printf("master_port: %d\n", slave->master_port);
-                printf("state: %s\n", slave->state.c_str());
-                printf("recv_size: %d\n", slave->recved_data_size);
-            }
-            else if (role_info.role == "sentinel")
-            {
-                std::shared_ptr<sentinel_node_info> sentinel = role_info.sentinel;
-
-                printf("monitored master list, count:%d\n", sentinel->master_name_list_monitored.size());
-                for (std::size_t i = 0; i < sentinel->master_name_list_monitored.size(); ++i)
-                {
-                    printf("i: %d, %s\n", i, sentinel->master_name_list_monitored[i].c_str());
-                }
-            }
-            else
-            {
-                printf("unsupport role type:%s\n", role_info.role.c_str());
-            }
-        }
-        else
-        {
-            printf("get role info failed\n");
-        }
-
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
-
-    system("pause");
-
-    pool.wait_for_stop();
-
-    //sync_client->destroy();
-}
-
-void redis_cluster_cmd_test(){
-    using namespace redis_cpp;
-    using namespace redis_cpp::detail;
-
-    utility::asio_base::thread_pool pool(2);
-    pool.start();
-
-    std::string redis_uri = "redis://foobared@127.0.0.1:7000/1";
-
-#if defined(__standalone_sync_client_test__)
-    standalone_sync_client* sync_client = new standalone_sync_client(pool.io_service(), redis_uri.c_str());
-    sync_client->connect();
-#elif defined(__standalone_sync_client_pool_test__)
-    standalone_sync_client_pool client_pool(redis_uri.c_str(), 1, 2, &pool);
-    base_sync_client* sync_client = &client_pool;
-#elif defined(__cluster_sync_client_test__)
-    std::string redis_uri_list = "redis://foobared@127.0.0.1:7000;redis://foobared@127.0.0.1:7001;redis://foobared@127.0.0.1:7002";
-    cluster_sync_client cluster(redis_uri_list.c_str(), 1, 2);
-    base_sync_client* sync_client = &cluster;
-#endif
-
-    redis_sync_operator client(sync_client);
-
-    while (true){
-        slot_range_map_type map;
-        if (client.cluster_slots(map)){
-            printf("slot range count[%d].\n", map.size());
-            int32_t index = 0;
-            for (auto& kv : map){
-                printf("%02d, range[%d~%d].\n", index, kv.first.start_slot, kv.first.end_slot);
-                printf("    master [%s:%d].\n", kv.second.master.ip.c_str(), kv.second.master.port);
-                printf("    slaves, count[%d]\n", kv.second.slave_list.size());
-                int32_t slave_index = 0;
-                for (auto& slave : kv.second.slave_list){
-                    printf("      %02d, %s:%d.\n", slave_index, slave.ip.c_str(), slave.port);
-                    slave_index++;
-                }
-                index++;
-            }
-        }
-        else{
-            printf("parser slot range failed\n");
-        }
-
-        system("pause");
-    }
-}
-
-void redis_sync_operator_test(){
-    //redis_key_test();
-
-    //redis_string_test();
-
-    //redis_list_test();
-
-    //redis_hash_test();
-
-    //redis_set_test();
-
-    //redis_zset_test();
-
-    //redis_pubsub_test();
-
-    redis_server_cmd_test();
-
-    //redis_cluster_cmd_test();
-}
-
-void default_reply_handler(redis_cpp::redis_reply* reply){
-    printf("default_reply_handler replyed\n");
-}
-
-void test_channel_message_handler(const std::string& channel_name, const std::string& message){
-    printf("recved message[%s] from channel[%s]\n",
-        message.c_str(), channel_name.c_str());
-}
-
-void standalone_async_client_test(){
-    using namespace redis_cpp;
-    using namespace redis_cpp::detail;
-
-    utility::asio_base::thread_pool pool(2);
-    pool.start();
-
-    
-#if defined(__standalone_async_client_test__)
-    std::string redis_uri = "redis://foobared@127.0.0.1:6379/1";
-    standalone_async_client s_client(pool.io_service(), redis_uri.c_str());
-    base_async_client* client = &s_client;
-#elif defined(__cluster_async_client_tet__)
-    std::string redis_uri = "redis://foobared@127.0.0.1:7000;redis://foobared@127.0.0.1:7001;redis://foobared@127.0.0.1:7002";
-    cluster_async_client c_client(redis_uri.c_str());
-    base_async_client* client = &c_client;
-#endif
-    client->connect();
-
-    std::string cmd;
-    while (true){
-        std::cout << "> ";
-        std::cin >> cmd;
-        if (cmd == "subscribe"){
-            std::string channel_name;
-            std::cin >> channel_name;
-            client->subscribe(channel_name,
-                std::bind(test_channel_message_handler, std::placeholders::_1, std::placeholders::_2),
-                std::bind(default_reply_handler, std::placeholders::_1));
-        }
-        else if (cmd == "unsubscribe"){
-            std::string channel_name;
-            std::cin >> channel_name;
-            client->unsubscribe(channel_name,
-                std::bind(default_reply_handler, std::placeholders::_1));
-        }
-        else if (cmd == "publish"){
-            std::string channel_name, message;
-            std::cin >> channel_name >> message;
-            client->publish(channel_name, message, std::bind(default_reply_handler, std::placeholders::_1));
-        }
-    }
-
-    pool.wait_for_stop();
-}
-
-void redis_async_operator_test(){
-    standalone_async_client_test();
-}
-
-void sentinel_client_test(){
-    const char* srv_list = "127.0.0.1:26379";
-    redis_cpp::detail::sentinel_client_pool* client_pool = new redis_cpp::detail::sentinel_client_pool(srv_list);
-    client_pool->start();
-
-    while (true){
-        std::string master_name;
-        std::cout << "input master name:" << std::endl;
-        std::cin >> master_name;
-        std::pair<std::string, int32_t> address;
-        if (client_pool->get_master_address_by_name(master_name.c_str(), address))
-        {
-            printf("master_name:%s's address is [%s:%d]\n",
-                master_name.c_str(), address.first.c_str(), address.second);
-        }
-        else
-        {
-            printf("try get master_name[%s]'s address failed\n",
-                master_name.c_str());
-        }
-    }
-}
-
-void sentinel_sync_client_test()
-{
-    using namespace redis_cpp;
-    using namespace redis_cpp::detail;
-
-    std::string master_name = "acmaster";
-    const char* srv_list = "127.0.0.1:26379";
-    sentinel_client_pool_ptr client_pool = sentinel_client_pool::create(srv_list);
-    client_pool->start();
-
-    std::string redis_uri_str = "redis://foobared@127.0.0.1:6381/1";
-    redis_uri uri(redis_uri_str.c_str());
-
-    std::pair<std::string, int32_t> address;
-    if (client_pool->get_master_address_by_name(master_name.c_str(), address))
-    {
-        uri.set_ip(address.first.c_str());
-        uri.set_port(address.second);
-
-        printf("master_name[%s]'s master address is [%s:%d].\n", master_name.c_str(), address.first.c_str(), address.second);
-
-        redis_uri_str = uri.to_string();
-    }
-    else
-    {
-        printf("try get master_name[%s]' master address failed.\n", master_name.c_str());
-    }
-
-    sentinel_sync_client* client = new sentinel_sync_client("acmaster", redis_uri_str.c_str(), 1, 2);
-    client->set_sentinel_client_pool(client_pool);
-    redis_sync_operator redis_op(client);
-
-    while (true)
-    {
-        std::string cmd;
-        std::cin >> cmd;
-        if (cmd == "set")
-        {
-            std::string key;
-            std::string value;
-            std::cin >> key >> value;
-
-            bool f = redis_op.set(key.c_str(), value.c_str());
-            printf("try set key[%s] to value[%s] ret[%d].\n", key.c_str(), value.c_str(), f);
-        }
-        else if (cmd == "get")
-        {
-            std::string key;
-            std::cin >> key;
-
-            std::string value;
-            bool f = redis_op.get(key.c_str(), value);
-            printf("try get key[%s] value[%s], ret[%d].\n",
-                key.c_str(), value.c_str(), f);
-
-        }else if(cmd == "del")
-        {
-            std::string key;
-            std::cin >> key;
-
-            int32_t count = redis_op.del(key.c_str());
-            printf("try del key[%s], count[%d]\n",
-                key.c_str(), count);
-        }
-    }
-}
-
-void sentinel_async_client_test()
-{
-    using namespace redis_cpp;
-    using namespace redis_cpp::detail;
-
-    std::string master_name = "acmaster";
-    const char* srv_list = "127.0.0.1:26379";
-    sentinel_client_pool_ptr client_pool = sentinel_client_pool::create(srv_list);
-    client_pool->start();
-
-    std::string redis_uri_str = "redis://foobared@127.0.0.1:6381/1";
-    redis_uri uri(redis_uri_str.c_str());
-
-    std::pair<std::string, int32_t> address;
-    if (client_pool->get_master_address_by_name(master_name.c_str(), address))
-    {
-        uri.set_ip(address.first.c_str());
-        uri.set_port(address.second);
-
-        printf("master_name[%s]'s master address is [%s:%d].\n", master_name.c_str(), address.first.c_str(), address.second);
-
-        redis_uri_str = uri.to_string();
-    }
-    else
-    {
-        printf("try get master_name[%s]' master address failed.\n", master_name.c_str());
-    }
-
-    utility::asio_base::thread_pool pool(2);
-    pool.start();
-
-    sentinel_async_client* client = new sentinel_async_client(master_name.c_str(), pool.io_service(), redis_uri_str.c_str());
-    client->set_sentinel_client_pool(client_pool);
-    client->connect();
-    std::string cmd;
-    while (true){
-        std::cout << "> ";
-        std::cin >> cmd;
-        if (cmd == "subscribe"){
-            std::string channel_name;
-            std::cin >> channel_name;
-            client->subscribe(channel_name,
-                std::bind(test_channel_message_handler, std::placeholders::_1, std::placeholders::_2),
-                std::bind(default_reply_handler, std::placeholders::_1));
-        }
-        else if (cmd == "unsubscribe"){
-            std::string channel_name;
-            std::cin >> channel_name;
-            client->unsubscribe(channel_name,
-                std::bind(default_reply_handler, std::placeholders::_1));
-        }
-        else if (cmd == "publish"){
-            std::string channel_name, message;
-            std::cin >> channel_name >> message;
-            client->publish(channel_name, message, std::bind(default_reply_handler, std::placeholders::_1));
-        }
-    }
-
-    pool.wait_for_stop();
-
-}
-
-int main()
-{
-    std::cout << "redis_cpp test." << std::endl;
-
-    redis_cpp::set_log_handler(redis_cpp_log_handler_1);
-
-    // log_handler_test();
-
-    // redis_cpp_initialize_test();
-
-    // redis_reply_test();
-
-    // redis_parser_test();
-
-    // standalone_syncclient_test();
-
-    // redis_sync_operator_test();
-
-    // redis_async_operator_test();
-
-    // sentinel_client_test();
-
-    // sentinel_sync_client_test();
-
-    sentinel_async_client_test();
-
-    system("pause");
-    return 0;
-}
-
 ```
+
+### 8. 订阅/发布相关操作
+ - 同步接口
+ 
+    ```
+	void redis_pubsub_test(){
+	    using namespace redis_cpp;
+	    using namespace redis_cpp::detail;
+	
+	    utility::asio_base::thread_pool pool(2);
+	    pool.start();
+	
+	    std::string redis_uri = "redis://foobared@127.0.0.1:6379/1";
+	
+	#if defined(__standalone_sync_client_test__)
+	    standalone_sync_client* sync_client = new standalone_sync_client(pool.io_service(), redis_uri.c_str());
+	    sync_client->connect();
+	#elif defined(__standalone_sync_client_pool_test__)
+	    standalone_sync_client_pool client_pool(redis_uri.c_str(), 1, 2, &pool);
+	    base_sync_client* sync_client = &client_pool;
+	#elif defined(__cluster_sync_client_test__)
+	    std::string redis_uri_list = 
+			"redis://foobared@127.0.0.1:7000;redis://foobared@127.0.0.1:7001;redis://foobared@127.0.0.1:7002";
+	    cluster_sync_client cluster(redis_uri_list.c_str(), 1, 2);
+	    base_sync_client* sync_client = &cluster;
+	#endif
+	
+	    redis_sync_operator client(sync_client);
+	
+	    std::string cmd;
+	    while (true)
+	    {
+	        std::cout << ">";
+	
+	        std::cin >> cmd;
+	
+	        if (cmd == "pubsub")
+	        {
+	            std::string p;
+	            std::cin >> p;
+	
+	            if (p == "numsub")
+	            {
+	                std::string channel_name;
+	                int32_t sub_count;
+	
+	                std::cin >> channel_name;
+	
+	                client.pubsub_numsub(channel_name.c_str(), sub_count);
+	
+	                printf("channel_name:%s, subed_count: %d\n", channel_name.c_str(), sub_count);
+	            }
+	            else if (p == "channels")
+	            {
+	                std::vector<std::string> out_result;
+	                client.pubsub_channels(out_result);
+	
+	                printf("current active channels count:%d\n", out_result.size());
+	                for (std::size_t i = 0; i < out_result.size(); ++i)
+	                {
+	                    printf("%d) %s\n", i + 1, out_result[i].c_str());
+	                }
+	            }
+	            else if (p == "numpat")
+	            {
+	                int32_t count = client.pubsub_numpat();
+	
+	                printf("numpat: %d\n", count);
+	            }
+	
+	        }
+	        else if (cmd == "publish")
+	        {
+	            std::string channel_name;
+	            std::string message;
+	
+	            std::cin >> channel_name;
+	            std::cin >> message;
+	
+	            int32_t recv_count = client.publish(channel_name.c_str(), message.c_str());
+	
+	            printf("recved_count: %d\n", recv_count);
+	        }
+	    }
+	
+	    system("pause");
+	
+	    pool.wait_for_stop();
+	
+	    //sync_client->destroy();
+	}
+    ```
+ - 异步接口
+ 
+    ```
+    void standalone_async_client_test(){
+	    using namespace redis_cpp;
+	    using namespace redis_cpp::detail;
+	
+	    utility::asio_base::thread_pool pool(2);
+	    pool.start();
+	    
+		#if defined(__standalone_async_client_test__)
+	    std::string redis_uri = "redis://foobared@127.0.0.1:6379/1";
+	    standalone_async_client s_client(pool.io_service(), redis_uri.c_str());
+	    base_async_client* client = &s_client;
+		#elif defined(__cluster_async_client_tet__)
+	    std::string redis_uri = 
+			"redis://foobared@127.0.0.1:7000;redis://foobared@127.0.0.1:7001;redis://foobared@127.0.0.1:7002";
+	    cluster_async_client c_client(redis_uri.c_str());
+	    base_async_client* client = &c_client;
+		#endif
+	    client->connect();
+	
+	    std::string cmd;
+	    while (true){
+	        std::cout << "> ";
+	        std::cin >> cmd;
+	        if (cmd == "subscribe"){
+	            std::string channel_name;
+	            std::cin >> channel_name;
+	            client->subscribe(channel_name,
+	                std::bind(test_channel_message_handler, std::placeholders::_1, std::placeholders::_2),
+	                std::bind(default_reply_handler, std::placeholders::_1));
+	        }
+	        else if (cmd == "unsubscribe"){
+	            std::string channel_name;
+	            std::cin >> channel_name;
+	            client->unsubscribe(channel_name,
+	                std::bind(default_reply_handler, std::placeholders::_1));
+	        }
+	        else if (cmd == "publish"){
+	            std::string channel_name, message;
+	            std::cin >> channel_name >> message;
+	            client->publish(channel_name, message, std::bind(default_reply_handler, std::placeholders::_1));
+	        }
+	    }
+	
+	    pool.wait_for_stop();
+	}
+    ```
+
+### 9. 其他命令
+ - server相关命令
+    
+   ```
+    void redis_server_cmd_test(){
+
+	    using namespace redis_cpp;
+	    using namespace redis_cpp::detail;
+	
+	    utility::asio_base::thread_pool pool(2);
+	    pool.start();
+	
+	    std::string redis_uri = "redis://foobared@127.0.0.1:6379/1";
+	
+	#if defined(__standalone_sync_client_test__)
+	    standalone_sync_client* sync_client = new standalone_sync_client(pool.io_service(), redis_uri.c_str());
+	    sync_client->connect();
+	#elif defined(__standalone_sync_client_pool_test__)
+	    standalone_sync_client_pool client_pool(redis_uri.c_str(), 1, 2, &pool);
+	    base_sync_client* sync_client = &client_pool;
+	#elif defined(__cluster_sync_client_test__)
+	    std::string redis_uri_list = 
+			"redis://foobared@127.0.0.1:7000;redis://foobared@127.0.0.1:7001;redis://foobared@127.0.0.1:7002";
+	    cluster_sync_client cluster(redis_uri_list.c_str(), 1, 2);
+	    base_sync_client* sync_client = &cluster;
+	#endif
+	
+	    redis_sync_operator client(sync_client);
+	
+	    while (true)
+	    {
+	        //system("pause");
+	
+	        int64_t time_server;
+	        int64_t microseconds;
+	
+	        if (client.time(&time_server, &microseconds))
+	        {
+	            time_t now = time(NULL);
+	            printf("time: %lld, microseconds: %lld, now[%d]\n",
+	                time_server, microseconds, (int32_t)now);
+	        }
+	        else
+	        {
+	            printf("get server time failed\n");
+	        }
+	
+	        node_role_info role_info;
+	
+	        if (client.role(role_info))
+	        {
+	            printf("role: %s\n", role_info.role.c_str());
+	
+	            if (role_info.role == "master")
+	            {
+	                std::shared_ptr<master_node_info> master = role_info.master;
+	
+	                printf("repli_offset: %d\n", master->replication_offset);
+	                printf("slave list, count:%d\n", master->slave_list.size());
+	                for (std::size_t i = 0; i < master->slave_list.size(); ++i)
+	                {
+	                    slave_base_info& slave_info = master->slave_list[i];
+	                    printf("------------------------------------------\n");
+	                    printf("ip: %s\n", slave_info.ip.c_str());
+	                    printf("port: %d\n", slave_info.port);
+	                    printf("replic_offset: %d\n", slave_info.replication_offset);
+	
+	                    printf("\n");
+	                }
+	            }
+	            else if (role_info.role == "slave")
+	            {
+	                std::shared_ptr<slave_node_info> slave = role_info.slave;
+	
+	                printf("master_ip: %s\n", slave->master_ip.c_str());
+	                printf("master_port: %d\n", slave->master_port);
+	                printf("state: %s\n", slave->state.c_str());
+	                printf("recv_size: %d\n", slave->recved_data_size);
+	            }
+	            else if (role_info.role == "sentinel")
+	            {
+	                std::shared_ptr<sentinel_node_info> sentinel = role_info.sentinel;
+	
+	                printf("monitored master list, count:%d\n", sentinel->master_name_list_monitored.size());
+	                for (std::size_t i = 0; i < sentinel->master_name_list_monitored.size(); ++i)
+	                {
+	                    printf("i: %d, %s\n", i, sentinel->master_name_list_monitored[i].c_str());
+	                }
+	            }
+	            else
+	            {
+	                printf("unsupport role type:%s\n", role_info.role.c_str());
+	            }
+	        }
+	        else
+	        {
+	            printf("get role info failed\n");
+	        }
+	
+	        std::this_thread::sleep_for(std::chrono::seconds(1));
+	    }
+	
+	    system("pause");
+	
+	    pool.wait_for_stop();
+	
+	    //sync_client->destroy();
+	}
+
+   ```
+ - cluster相关命令
+ 
+   ```
+   void redis_cluster_cmd_test(){
+	    using namespace redis_cpp;
+	    using namespace redis_cpp::detail;
+	
+	    utility::asio_base::thread_pool pool(2);
+	    pool.start();
+	
+	    std::string redis_uri = "redis://foobared@127.0.0.1:7000/1";
+	
+	#if defined(__standalone_sync_client_test__)
+	    standalone_sync_client* sync_client = new standalone_sync_client(pool.io_service(), redis_uri.c_str());
+	    sync_client->connect();
+	#elif defined(__standalone_sync_client_pool_test__)
+	    standalone_sync_client_pool client_pool(redis_uri.c_str(), 1, 2, &pool);
+	    base_sync_client* sync_client = &client_pool;
+	#elif defined(__cluster_sync_client_test__)
+	    std::string redis_uri_list = 
+			"redis://foobared@127.0.0.1:7000;redis://foobared@127.0.0.1:7001;redis://foobared@127.0.0.1:7002";
+	    cluster_sync_client cluster(redis_uri_list.c_str(), 1, 2);
+	    base_sync_client* sync_client = &cluster;
+	#endif
+	
+	    redis_sync_operator client(sync_client);
+	
+	    while (true){
+	        slot_range_map_type map;
+	        if (client.cluster_slots(map)){
+	            printf("slot range count[%d].\n", map.size());
+	            int32_t index = 0;
+	            for (auto& kv : map){
+	                printf("%02d, range[%d~%d].\n", index, kv.first.start_slot, kv.first.end_slot);
+	                printf("    master [%s:%d].\n", kv.second.master.ip.c_str(), kv.second.master.port);
+	                printf("    slaves, count[%d]\n", kv.second.slave_list.size());
+	                int32_t slave_index = 0;
+	                for (auto& slave : kv.second.slave_list){
+	                    printf("      %02d, %s:%d.\n", slave_index, slave.ip.c_str(), slave.port);
+	                    slave_index++;
+	                }
+	                index++;
+	            }
+	        }
+	        else{
+	            printf("parser slot range failed\n");
+	        }
+	
+	        system("pause");
+	    }
+    }
+
+   ```
