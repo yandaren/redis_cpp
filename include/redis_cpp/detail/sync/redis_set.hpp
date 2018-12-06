@@ -84,7 +84,7 @@ public:
     * @param value
     * @return the count of the element added to the set
     */
-    int32_t sadd(const char* key, std::vector<std::string>& values)
+    int32_t sadd(const char* key, const std::vector<std::string>& values)
     {
         redis_command cmd("sadd");
 
