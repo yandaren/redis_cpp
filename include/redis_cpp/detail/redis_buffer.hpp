@@ -165,7 +165,7 @@ public:
     }
 
     void    set_write_index(int32_t index){
-        if (index >= 0 && index < capacity_)
+        if (index >= 0 && index <= capacity_)
             writer_index_ = index;
         else
             throw std::runtime_error("set write index out of bounds.");
