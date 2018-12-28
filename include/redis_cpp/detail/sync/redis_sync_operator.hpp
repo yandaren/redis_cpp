@@ -22,6 +22,7 @@
 #include <redis_cpp/detail/sync/redis_pubsub.hpp>
 #include <redis_cpp/detail/sync/redis_server.hpp>
 #include <redis_cpp/detail/sync/redis_cluster.hpp>
+#include <redis_cpp/detail/sync/redis_script.hpp>
 #include <redis_cpp/detail/sync/redis_connection.hpp>
 
 namespace redis_cpp
@@ -38,6 +39,7 @@ class redis_sync_operator :
     public redis_pubsub,
     public redis_server,
     public redis_cluster,
+    public redis_script,
     public redis_connection
 {
 public:
