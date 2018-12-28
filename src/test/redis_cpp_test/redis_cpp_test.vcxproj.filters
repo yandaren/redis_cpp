@@ -27,6 +27,9 @@
     <Filter Include="include\redis_cpp\detail\sync">
       <UniqueIdentifier>{3c33c872-d7b5-4f6a-88d1-214de8533baf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{f432f4e4-7df4-49ab-acec-676b979e424d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="redis_test.cpp">
@@ -156,6 +159,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\redis_cpp\detail\sentinel\sentinel_client.hpp">
       <Filter>include\redis_cpp\detail\sentinel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\detail\sync\redis_script.hpp">
+      <Filter>include\redis_cpp\detail\sync</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\utils\redis_lock.hpp">
+      <Filter>utils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

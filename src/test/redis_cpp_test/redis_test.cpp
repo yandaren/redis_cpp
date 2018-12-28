@@ -2,6 +2,7 @@
 #include <strstream>
 #include <vector>
 #include <redis_cpp.hpp>
+#include <utils/redis_lock.hpp>
 #include <utility/asio_base/thread_pool.hpp>
 
 //#define __standalone_sync_client_test__
@@ -108,10 +109,10 @@ void print_reply(redis_cpp::redis_reply* reply, int32_t dep, std::vector<int32_t
             for (auto up_index : up_arry_index){
                 std::cout << up_index << ".";
             }
-            std::cout << i + 1 << ") ";
             if (i == 0)
-                std::cout << arry.size();
-            std::cout << "\n";
+                std::cout << arry.size() << "\n";
+
+            std::cout << i + 1 << ") " << "\n";
 
             std::vector<int32_t> up_arry_index_new = up_arry_index;
             up_arry_index_new.push_back(i + 1);
@@ -122,6 +123,12 @@ void print_reply(redis_cpp::redis_reply* reply, int32_t dep, std::vector<int32_t
             std::cout << prefix << "empty map or list" << "\n";
         }
     }
+}
+
+void print_reply(redis_cpp::redis_reply* reply) {
+    std::vector<int32_t> up_index;
+
+    print_reply(reply, 0, up_index);
 }
 
 void redis_parser_test(){
@@ -1867,6 +1874,133 @@ void sentinel_async_client_test()
 
 }
 
+void redis_script_test() {
+    using namespace redis_cpp;
+    using namespace redis_cpp::detail;
+
+    utility::asio_base::thread_pool pool(2);
+    pool.start();
+
+    std::string redis_uri = "redis://foobared@127.0.0.1:6379/0";
+
+    standalone_sync_client_pool client_pool(redis_uri.c_str(), 1, 2, &pool);
+    base_sync_client* sync_client = &client_pool;
+    redis_sync_operator client(sync_client);
+
+    while (true) {
+
+        std::vector<std::string> keys;
+        keys.push_back("key1");
+        keys.push_back("key2");
+
+        std::vector<std::string> args;
+        args.push_back("first");
+        args.push_back("second");
+
+        printf("a.\n-------------------------------------------\n");
+        redis_cpp::redis_reply* reply = client.eval("return {KEYS[1],KEYS[2],ARGV[1],ARGV[2]}", keys, args);
+        if (reply) {
+            std::vector<int32_t> up_index;
+            printf("reply content:\n");
+            print_reply(reply);
+        }
+        else {
+            printf("reply content is nil:\n");
+        }
+
+        printf("b.\n-------------------------------------------\n");
+        do {
+            std::string script_sha;
+            if (!client.script_load("return 'hello moto'", script_sha)) {
+                printf("try load script failed.\n");
+                break;
+            }
+
+            printf("sha1: %s\n", script_sha.c_str());
+
+            printf("c.\n-------------------------------------------\n");
+
+            std::vector<bool> exist_list;
+            std::vector<std::string> sha1_list;
+            sha1_list.push_back(script_sha);
+
+            if (!client.script_exists(sha1_list, exist_list)) {
+                printf("try do script_exists failed.\n");
+                break;
+            }
+
+            for (int32_t i = 0; i < (int32_t)exist_list.size(); ++i) {
+                printf("%d exist[%d]\n", i, (int32_t)exist_list[i]);
+
+                if (exist_list[i]) {
+                    std::vector<std::string> keys;
+                    reply = client.evalsha(sha1_list[i].c_str(), keys, keys);
+                    if (reply) {
+                        printf("reply content:\n");
+                        print_reply(reply);
+                    }
+                }
+            }
+
+            printf("d.\n-------------------------------------------\n");
+            printf("try flush the scripts:\n");
+            bool ret = client.script_flush();
+            printf("flush scripts result[%d]\n", ret);
+            
+            if (!client.script_exists(sha1_list, exist_list)) {
+                printf("try do script_exists failed.\n");
+                break;
+            }
+
+            for (int32_t i = 0; i < (int32_t)exist_list.size(); ++i) {
+                printf("%d exist[%d]\n", i, (int32_t)exist_list[i]);
+            }
+
+        } while (0);
+
+
+        system("pause");
+    }
+}
+
+static uint32_t get_cur_time() {
+    return std::chrono::duration_cast<std::chrono::duration<uint32_t, std::milli>>(
+        std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+}
+
+void redis_lock_test() {
+    using namespace redis_cpp;
+    using namespace redis_cpp::detail;
+
+    utility::asio_base::thread_pool pool(2);
+    pool.start();
+
+    std::string redis_uri = "redis://foobared@127.0.0.1:6379/0";
+
+    standalone_sync_client_pool client_pool(redis_uri.c_str(), 1, 2, &pool);
+    base_sync_client* sync_client = &client_pool;
+    redis_sync_operator client(sync_client);
+
+    while (true) {
+        std::string lock_key;
+        std::string requestor_id;
+        int32_t     expired_time;
+        int32_t     time_out;
+
+        printf("input params:\n");
+
+        std::cin >> lock_key >> requestor_id >> expired_time >> time_out;
+
+        uint32_t start_time = get_cur_time();
+        printf("try start get locker: %u\n", start_time);
+        redis_cpp::utils::redis_auto_lock locker(&client, lock_key, requestor_id, expired_time, time_out);
+        uint32_t end_time = get_cur_time();
+        uint32_t cost = end_time - start_time;
+        bool locked = locker.islocked();
+        printf("time: %u, cost: %d, locked: %d\n", end_time, cost, locked);
+    }
+}
+
 int main()
 {
     std::cout << "redis_cpp test." << std::endl;
@@ -1891,7 +2025,11 @@ int main()
 
     // sentinel_sync_client_test();
 
-    sentinel_async_client_test();
+    // sentinel_async_client_test();
+
+    // redis_script_test();
+
+    redis_lock_test();
 
     system("pause");
     return 0;
