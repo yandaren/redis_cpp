@@ -12,7 +12,7 @@
 #define __ydk_rediscpp_detail_redis_reply_util_hpp__
 
 #include <redis_cpp/detail/config.hpp>
-#include <redis_cpp/detail/redis_reply_util.hpp>
+#include <redis_cpp/detail/redis_slot_range.hpp>
 #include <redis_cpp/redis_reply.hpp>
 
 namespace redis_cpp

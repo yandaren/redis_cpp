@@ -15,7 +15,6 @@
 #include <string>
 #include <chrono>
 #include <thread>
-#include <redis_cpp/detail/redis_reply_util.hpp>
 #include <redis_cpp/detail/sync/redis_sync_operator.hpp>
 
 namespace redis_cpp
