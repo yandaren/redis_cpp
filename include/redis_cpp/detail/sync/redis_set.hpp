@@ -228,7 +228,7 @@ public:
     * @param value
     * @return the element count that been removed
     */
-    int32_t srem(const char* key, std::vector<std::string>& values_to_remove)
+    int32_t srem(const char* key, const std::vector<std::string>& values_to_remove)
     {
         redis_command cmd("srem");
 
