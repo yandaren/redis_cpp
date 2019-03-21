@@ -101,7 +101,7 @@ protected:
         redis_reply_arr& arr = reply->to_array();
         for (auto& r : arr){
             if (r.is_string()){
-                array_result.push_back(std::move(r.to_string()));
+                array_result.push_back(r.to_string());
             }
         }
 
@@ -123,7 +123,7 @@ protected:
         redis_reply_arr& arr = reply->to_array();
         for (auto& r : arr){
             if (r.is_string()){
-                array_result.push_back(std::move(r.to_string()));
+                array_result.push_back(r.to_string());
             }
         }
 
@@ -203,7 +203,7 @@ protected:
             return false;
 
         if (out_value){
-            *out_value = std::move(reply->to_string());
+            *out_value = reply->to_string();
         }
 
         return true;
@@ -217,7 +217,7 @@ protected:
         if (!reply || !reply->is_string())
             return false;
 
-        out_value = std::move(reply->to_string());
+        out_value = reply->to_string();
 
         return true;
     }
@@ -228,9 +228,9 @@ protected:
     std::string get_string_result(redis_command& cmd){
         redis_reply* reply = do_command(cmd);
         if (!reply || !reply->is_string())
-            return std::move(std::string());
+            return "";
 
-        return std::move(reply->to_string());
+        return reply->to_string();
     }
 
     /** 
@@ -261,8 +261,8 @@ protected:
         if (!arr[0].is_string() || !arr[1].is_string())
             return false;
 
-        out_value.first = std::move(arr[0].to_string());
-        out_value.second = std::move(arr[1].to_string());
+        out_value.first = arr[0].to_string();
+        out_value.second = arr[1].to_string();
 
         return true;
     }
@@ -294,7 +294,7 @@ protected:
         if (!reply || !reply->is_array())
             return false;
 
-        arr = std::move(reply->to_array());
+        arr = reply->to_array();
         return true;
     }
 
@@ -354,7 +354,7 @@ protected:
         std::string& next_cursor_str = arr[0].to_string();
         uint64_t next_cursor = 0;
         sscanf(next_cursor_str.c_str(), "%llu", &next_cursor);
-        out_result = std::move(arr[1].to_array());
+        out_result = arr[1].to_array();
 
         return next_cursor;
     }

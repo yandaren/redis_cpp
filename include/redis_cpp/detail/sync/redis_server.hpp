@@ -132,7 +132,7 @@ public:
         if (arr.size() < 1)
             return false;
 
-        role_info.role = std::move(arr[0].to_string());
+        role_info.role = arr[0].to_string();
 
         if (role_info.role == "master"){
             return parser_role_master(role_info, arr);
@@ -173,7 +173,7 @@ protected:
 
             role_info.master->slave_list.resize(role_info.master->slave_list.size() + 1);
             auto& back = role_info.master->slave_list.back();
-            back.ip = std::move(slave_info[0].to_string());
+            back.ip = slave_info[0].to_string();
             std::string& port_str = slave_info[1].to_string();
             sscanf(port_str.c_str(), "%d", &back.port);
             std::string& replication_offset_str = slave_info[2].to_string();
@@ -189,9 +189,9 @@ protected:
         }
 
         role_info.slave = std::make_shared<slave_node_info>();
-        role_info.slave->master_ip = std::move(arr[1].to_string());
+        role_info.slave->master_ip = arr[1].to_string();
         role_info.slave->master_port = arr[2].to_integer();
-        role_info.slave->state = std::move(arr[3].to_string());
+        role_info.slave->state = arr[3].to_string();
         role_info.slave->recved_data_size = arr[4].to_integer();
         return true;
     }
@@ -207,7 +207,7 @@ protected:
         for (std::size_t i = 0; i < master_name_list.size(); ++i)
         {
             role_info.sentinel->master_name_list_monitored.push_back(
-                std::move(master_name_list[i].to_string()));
+                master_name_list[i].to_string());
         }
 
         return true;

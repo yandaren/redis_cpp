@@ -161,11 +161,11 @@ public:
             if (read_ctx_.array_stack.empty())
                 break;
 
-            read_ctx_.array_stack.top().push_back(std::move(*read_ctx_.reply));
+            read_ctx_.array_stack.top().push_back(*read_ctx_.reply);
             bool need_break = false;
             while (!read_ctx_.array_stack.empty() && 
                    read_ctx_.array_stack.top().size() == read_ctx_.array_size_stack.top()){
-                redis_reply_arr top_element(std::move(read_ctx_.array_stack.top()));
+                redis_reply_arr top_element(read_ctx_.array_stack.top());
                 read_ctx_.array_stack.pop();
                 read_ctx_.array_size_stack.pop();
 
@@ -350,7 +350,7 @@ protected:
             return redis_ok;
         }
         else if (array_size == 0){
-            read_ctx_.reply = std::make_shared<redis_reply>(std::move(redis_reply_arr()));
+            read_ctx_.reply = std::make_shared<redis_reply>(redis_reply_arr());
 
             // move next_parser task( mainly reset the reply type)
             move_next_parse_task();
@@ -361,7 +361,7 @@ protected:
             // array size > 0
             // to array stack
             read_ctx_.array_size_stack.push(array_size);
-            read_ctx_.array_stack.push(std::move(redis_reply_arr()));
+            read_ctx_.array_stack.push(redis_reply_arr());
 
             // move next_parser task( mainly reset the reply type)
             move_next_parse_task();

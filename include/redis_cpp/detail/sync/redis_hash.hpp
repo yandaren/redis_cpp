@@ -230,11 +230,11 @@ public:
             return false;
         }
 
-        for (std::size_t i = 0; i < arr.size(); i = i + 2)
+        for (int32_t i = 0; i < int32_t(arr.size()) - 1; i = i + 2)
         {
             out_table.insert(
                 std::move(std::pair<std::string, std::string>(
-                std::move(arr[i].to_string()), std::move(arr[i+1].to_string()))));
+                arr[i].to_string(), arr[i+1].to_string())));
         }
 
         return true;
@@ -351,15 +351,18 @@ public:
         redis_reply_arr arr;
         uint64_t next_cursor = scan_key("hscan", key, cursor, arr, pattern, count);
 
+        if (arr.empty()) {
+            return 0;
+        }
+
         if (arr.size() % 2 != 0)
             return 0;
 
         out_result.clear();
-        for (std::size_t i = 0; i < arr.size(); i = i + 2)
-        {
+        for (int32_t i = 0; i < int32_t(arr.size()) - 1; i = i + 2){
             out_result.insert(
                 std::move(std::pair<std::string, std::string>(
-                std::move(arr[i].to_string()), std::move(arr[i + 1].to_string()))));
+                    arr[i].to_string(), arr[i + 1].to_string())));
         }
 
         return next_cursor;

@@ -56,7 +56,7 @@ namespace reply_util
                 return false;
             }
 
-            rang_info.master.ip = std::move(master_detail[0].to_string());
+            rang_info.master.ip = master_detail[0].to_string();
             rang_info.master.port = master_detail[1].to_integer();
 
             for (std::size_t i = 3; i < node_detail.size(); ++i){
@@ -73,7 +73,7 @@ namespace reply_util
 
                 rang_info.slave_list.resize(rang_info.slave_list.size() + 1);
                 auto& slave_address = rang_info.slave_list.back();
-                slave_address.ip = std::move(slave_detail[0].to_string());
+                slave_address.ip = slave_detail[0].to_string();
                 slave_address.port = slave_detail[1].to_integer();
             }
 

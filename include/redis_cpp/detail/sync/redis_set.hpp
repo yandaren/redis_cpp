@@ -514,7 +514,7 @@ public:
 
         for (std::size_t i = 0; i < arr.size(); ++i)
         {
-            out_result.push_back(std::move(arr[i].to_string()));
+            out_result.push_back(arr[i].to_string());
         }
 
         return next_cursor;
