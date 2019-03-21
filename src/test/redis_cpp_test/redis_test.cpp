@@ -68,12 +68,12 @@ void redis_cpp_initialize_test()
 void redis_reply_test(){
     redis_cpp::redis_reply rp1;
     std::cout << std::boolalpha;
-    std::cout << "rp1 is null [" << rp1.is<redis_cpp::nil_reply>() << "] " << std::endl;
+    std::cout << "rp1 is null [" << rp1.is_nil() << "] " << std::endl;
     redis_cpp::error_reply error("clust is down!");
     redis_cpp::redis_reply rp2(error);
-    std::cout << "rp2 is error [" << rp2.is<redis_cpp::error_reply>() << "] " << std::endl;
-    if (rp2.is<redis_cpp::error_reply>()){
-        redis_cpp::error_reply& error = rp2.get<redis_cpp::error_reply>();
+    std::cout << "rp2 is error [" << rp2.is_error() << "] " << std::endl;
+    if (rp2.is_error()){
+        redis_cpp::error_reply& error = rp2.to_error();
         std::cout << "rp2 error msg[" << error.msg << "]" << std::endl;
     }
 }
@@ -89,20 +89,20 @@ std::string get_prefix_of_dep(int32_t dep){
 void print_reply(redis_cpp::redis_reply* reply, int32_t dep, std::vector<int32_t>& up_arry_index){
     using namespace redis_cpp;
     std::string prefix(std::move(get_prefix_of_dep(dep)));
-    if (reply->is<nil_reply>()){
+    if (reply->is_nil()){
         std::cout << prefix << "nil" << "\n";
     }
-    else if (reply->is<error_reply>()){
-        std::cout << prefix << "error(" << reply->get<error_reply>().msg << ")" << "\n";
+    else if (reply->is_error()){
+        std::cout << prefix << "error(" << reply->to_error().msg << ")" << "\n";
     }
-    else if (reply->is<int32_t>()){
-        std::cout << prefix << "integer: " << reply->get<int32_t>() << "\n";
+    else if (reply->is_integer()){
+        std::cout << prefix << "integer: " << reply->to_integer() << "\n";
     }
-    else if (reply->is<std::string>()){
-        std::cout << prefix << reply->get<std::string>() << "\n";
+    else if (reply->is_string()){
+        std::cout << prefix << reply->to_string() << "\n";
     }
-    else if (reply->is <redis_reply_arr>()){
-        redis_reply_arr& arry = reply->get<redis_reply_arr>();
+    else if (reply->is_array()){
+        redis_reply_arr& arry = reply->to_array();
         for (std::size_t i = 0; i < arry.size(); ++i){
             std::cout << prefix;
             
@@ -143,7 +143,7 @@ void redis_parser_test(){
     }
     else{
         redis_reply* reply = parser.get_reply();
-        printf("reply is [%s]\n", reply->get<std::string>().c_str());
+        printf("reply is [%s]\n", reply->to_string().c_str());
     }
 
     parser.push_bytes("+PONG\r\n");
@@ -153,7 +153,7 @@ void redis_parser_test(){
     }
     else{
         redis_reply* reply = parser.get_reply();
-        printf("reply is [%s]\n", reply->get<std::string>().c_str());
+        printf("reply is [%s]\n", reply->to_string().c_str());
     }
 
     // error test
@@ -164,7 +164,7 @@ void redis_parser_test(){
     }
     else{
         redis_reply* reply = parser.get_reply();
-        printf("error reply is [%s]\n", reply->get<error_reply>().msg.c_str());
+        printf("error reply is [%s]\n", reply->to_error().msg.c_str());
     }
 
     // integer test
@@ -175,7 +175,7 @@ void redis_parser_test(){
     }
     else{
         redis_reply* reply = parser.get_reply();
-        printf("integer reply is [%d]\n", reply->get<int32_t>());
+        printf("integer reply is [%d]\n", reply->to_integer());
     }
 
     // bulk string test
@@ -186,7 +186,7 @@ void redis_parser_test(){
     }
     else{
         redis_reply* reply = parser.get_reply();
-        printf("bulk reply is [%s]\n", reply->get<std::string>().c_str());
+        printf("bulk reply is [%s]\n", reply->to_string().c_str());
     }
 
     parser.push_bytes("$0\r\n\r\n");
@@ -196,7 +196,7 @@ void redis_parser_test(){
     }
     else{
         redis_reply* reply = parser.get_reply();
-        printf("bulk reply is [%s]\n", reply->get<std::string>().c_str());
+        printf("bulk reply is [%s]\n", reply->to_string().c_str());
     }
 
     parser.push_bytes("$-1\r\n");
@@ -206,8 +206,8 @@ void redis_parser_test(){
     }
     else{
         redis_reply* reply = parser.get_reply();
-        nil_reply& nil = reply->get<nil_reply>();
-        printf("bulk reply is nil[%d]\n", reply->is<nil_reply>());
+        nil_reply& nil = reply->to_nil();
+        printf("bulk reply is nil[%d]\n", reply->is_nil());
     }
 
     parser.push_bytes("$25\r\nfuzuotao");
@@ -222,7 +222,7 @@ void redis_parser_test(){
     }
     else{
         redis_reply* reply = parser.get_reply();
-        printf("bulk reply is [%s]\n", reply->get<std::string>().c_str());
+        printf("bulk reply is [%s]\n", reply->to_string().c_str());
     }
 
     // arry test
@@ -266,7 +266,7 @@ void redis_parser_test(){
     }
     else{
         redis_reply* reply = parser.get_reply();
-        redis_reply_arr& arr = reply->get<redis_reply_arr>();
+        redis_reply_arr& arr = reply->to_array();
 
         std::vector<int32_t> up_index;
         print_reply(reply, 0, up_index);
@@ -2001,6 +2001,69 @@ void redis_lock_test() {
     }
 }
 
+void redis_lua_script_test() {
+    using namespace redis_cpp;
+    using namespace redis_cpp::detail;
+
+    utility::asio_base::thread_pool pool(2);
+    pool.start();
+
+    std::string redis_uri = "redis://foobared@127.0.0.1:6379/0";
+
+    standalone_sync_client_pool client_pool(redis_uri.c_str(), 1, 2, &pool);
+    base_sync_client* sync_client = &client_pool;
+    redis_sync_operator client(sync_client);
+
+    //int32_t max_inst_id = 0x7FFF;
+    while (true) {
+
+        std::string service_name;
+        std::string inst_key;
+        std::cin >> service_name >> inst_key;
+
+        char service_name_inst_id_pool[128] = { 0 };
+
+        sprintf(service_name_inst_id_pool, "service_mgr_service_%s_inst_id_pool",
+            service_name.c_str());
+
+        char service_name_inst_id_map[128] = { 0 };
+        sprintf(service_name_inst_id_map, "service_mgr_service_%s_inst_id_map",
+            service_name.c_str());
+
+        std::vector<std::string> keys;
+        keys.push_back(service_name_inst_id_pool);
+        keys.push_back(inst_key);
+        keys.push_back(service_name_inst_id_map);
+
+        // keys[1] ==> service_name_inst_id_pool
+        // keys[2] ==> inst_key
+        // kyes[3] ==> service_name_inst_id_map [ inst_key -> inst_id ]
+
+        std::string exist_script = R"=(
+            if redis.call('exists', KEYS[1]) == 0 then
+                for i = 1, 10000, 1 do
+                    redis.call('rpush', KEYS[1], i)
+                end
+            end
+
+            local inst_id = redis.call('hget', KEYS[3], KEYS[2])
+            if not inst_id then
+                inst_id = redis.call('lpop', KEYS[1])
+                redis.call('hset', KEYS[3], KEYS[2], inst_id)
+            end
+
+            return inst_id
+        )=";
+
+        std::vector<std::string> args;
+        redis_cpp::redis_reply* reply = client.eval(exist_script.c_str(), keys, args);
+
+        print_reply(reply);
+
+        system("pause");
+    }
+}
+
 int main()
 {
     std::cout << "redis_cpp test." << std::endl;
@@ -2029,7 +2092,9 @@ int main()
 
     // redis_script_test();
 
-    redis_lock_test();
+    // redis_lock_test();
+
+    redis_lua_script_test();
 
     system("pause");
     return 0;

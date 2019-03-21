@@ -363,7 +363,7 @@ public:
         for (std::size_t i = 0; i < array_reply.size(); ++i)
         {
             std::string s;
-            out_elements.push_back(std::move(array_reply[i].to_string()));
+            out_elements.push_back(array_reply[i].to_string());
         }
 
         return next_cursor;

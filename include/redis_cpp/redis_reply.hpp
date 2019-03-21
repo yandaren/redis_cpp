@@ -11,7 +11,7 @@
 #ifndef __ydk_rediscpp_redis_reply_hpp__
 #define __ydk_rediscpp_redis_reply_hpp__
 
-#include <utility/variant/variant.hpp>
+#include <mpark/variant.hpp>
 #include <string.h>
 #include <cstdint>
 #include <vector>
@@ -53,7 +53,7 @@ typedef std::vector<redis_reply>     redis_reply_arr;
 class redis_reply
 {
 protected:
-    utility::variant<nil_reply, error_reply, int32_t, std::string, redis_reply_arr> content_;
+    mpark::variant<nil_reply, error_reply, int32_t, std::string, redis_reply_arr> content_;
 public:
     redis_reply() : content_(nil_reply()){
     }
@@ -77,57 +77,44 @@ public:
 	}
 
 public:
-    template<class type>
-    bool is() const
-    {
-        return content_.is<type>();
-    }
-
-    template<typename type>
-    typename std::decay<type>::type& get()
-    {
-        return content_.get<type>();
-    }
-
-public:
     bool is_nil(){
-        return content_.is<nil_reply>();
+        return content_.index() == 0;
     }
 
     bool is_error(){
-        return content_.is<error_reply>();
+        return content_.index() == 1;
     }
 
-    bool is_integer(){
-        return content_.is<int32_t>();
+    bool is_integer() {
+        return content_.index() == 2;
     }
 
     bool is_string(){
-        return content_.is<std::string>();
+        return content_.index() == 3;
     }
 
     bool is_array(){
-        return content_.is<redis_reply_arr>();
+        return content_.index() == 4;
     }
 
     nil_reply& to_nil(){
-        return content_.get<nil_reply>();
+        return mpark::get<nil_reply>(content_);
     }
 
     error_reply& to_error(){
-        return content_.get<error_reply>();
+        return mpark::get<error_reply>(content_);
     }
 
     int32_t to_integer(){
-        return content_.get<int32_t>();
+        return mpark::get<int32_t>(content_);
     }
 
     std::string& to_string(){
-        return content_.get<std::string>();
+        return mpark::get<std::string>(content_);
     }
 
     redis_reply_arr& to_array(){
-        return content_.get<redis_reply_arr>();
+        return mpark::get<redis_reply_arr>(content_);
     }
 
     bool    check_status_ok(){

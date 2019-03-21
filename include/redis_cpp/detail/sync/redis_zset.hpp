@@ -563,7 +563,7 @@ public:
         {
             out_result.push_back(
                 std::move(std::pair<std::string, double>(
-                std::move(arr[i].to_string()), atof(arr[i + 1].to_string().c_str()))));
+                arr[i].to_string(), atof(arr[i + 1].to_string().c_str()))));
         }
 
         return next_cursor;
@@ -584,7 +584,7 @@ protected:
         {
             out_result.push_back(
                 std::move(std::pair<std::string, double>(
-                std::move(arr[i].to_string()), atof(arr[i+1].to_string().c_str()))));
+                arr[i].to_string(), atof(arr[i+1].to_string().c_str()))));
         }
         return true;
     }

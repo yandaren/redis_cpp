@@ -44,7 +44,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\..\3rd\\spdlog-0.12.0\include;$(SolutionDir)..\;$(SolutionDir)..\..\..\..\3rd\asio-asio-1-11-0\asio\include;$(SolutionDir)..\..\..\..\;$(SolutionDir)..\..\include;$(SolutionDir)..\..\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\;$(SolutionDir)..\..\3rd\variant-1.4.0\include;$(SolutionDir)..\..\3rd\asio-asio-1-11-0\asio\include;$(SolutionDir)..\..\;$(SolutionDir)..\..\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -59,7 +59,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\..\3rd\\spdlog-0.12.0\include;$(SolutionDir)..\;$(SolutionDir)..\..\..\..\3rd\asio-asio-1-11-0\asio\include;$(SolutionDir)..\..\..\..\;$(SolutionDir)..\..\include;$(SolutionDir)..\..\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\;$(SolutionDir)..\..\3rd\variant-1.4.0\include;$(SolutionDir)..\..\3rd\asio-asio-1-11-0\asio\include;$(SolutionDir)..\..\;$(SolutionDir)..\..\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>

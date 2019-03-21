@@ -118,7 +118,7 @@ public:
 
             out_result.insert(
                 std::move(std::pair<std::string, int32_t>(
-                std::move(arr[i].to_string()), sub_num)));
+                arr[i].to_string(), sub_num)));
         }
         return true;
     }
