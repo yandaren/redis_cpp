@@ -3,6 +3,7 @@
 #include <vector>
 #include <redis_cpp.hpp>
 #include <utils/redis_lock.hpp>
+#include <redis_cpp/utils/ip_utils.hpp>
 #include <utility/asio_base/thread_pool.hpp>
 
 //#define __standalone_sync_client_test__
@@ -2064,6 +2065,51 @@ void redis_lua_script_test() {
     }
 }
 
+void domain_test() {
+    printf("domain_test\n");
+
+    std::string domain;
+    while (std::cin >> domain) {
+        std::vector<std::string> ip_list = redis_cpp::ip_utils::v4::get_ip_list(domain.c_str());
+
+        printf("domain: %s, ip_count: %zd\n", domain.c_str(), ip_list.size());
+        for (int32_t i = 0; i < int32_t(ip_list.size()); ++i) {
+            printf("index: %d, ip: %s\n", i, ip_list[i].c_str());
+        }
+    }
+}
+
+void domain_connect_test() {
+    using namespace redis_cpp;
+    using namespace redis_cpp::detail;
+
+    utility::asio_base::thread_pool pool(2);
+    pool.start();
+
+    std::string redis_uri = "redis://123456@localhost:6379/1";
+
+    standalone_sync_client* sync_client = new standalone_sync_client(pool.io_service(), redis_uri.c_str());
+    sync_client->connect();
+
+    redis_sync_operator client(sync_client);
+
+    // set foo bar
+    client.set("foo", "bar");
+    client.set("foo1", "bar1");
+    client.set("foo2", "bar2");
+
+    // get foo
+    std::string res_foo;
+    if (client.get("foo", res_foo))
+    {
+        printf("get foo: %s\n", res_foo.c_str());
+    }
+    else
+    {
+        printf("get foo: failed\n");
+    }
+}
+
 int main()
 {
     std::cout << "redis_cpp test." << std::endl;
@@ -2094,7 +2140,12 @@ int main()
 
     // redis_lock_test();
 
-    redis_lua_script_test();
+    // redis_lua_script_test();
+
+    //redis_key_test();
+
+    //domain_test();
+    domain_connect_test();
 
     system("pause");
     return 0;
