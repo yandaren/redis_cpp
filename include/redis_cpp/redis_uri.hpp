@@ -12,6 +12,7 @@
 #define __ydk_rediscpp_redis_uri_hpp__
 
 #include <redis_cpp/detail/config.hpp>
+#include <redis_cpp/utils/ip_utils.hpp>
 #include <cstdint>
 #include <sstream>
 
@@ -43,32 +44,42 @@ protected:
             return;
 
         passwd_ = uri.substr(pos, passwd_pos - pos);
-        std::size_t ip_pos = uri.find(":", passwd_pos);
-        if (ip_pos != std::string::npos)
-        {
-            ip_ = uri.substr(passwd_pos + 1, ip_pos - passwd_pos - 1);
 
-            std::size_t port_pos = uri.find("/", ip_pos);
+        std::string hostname = "localhost";
+        std::size_t host_pos = uri.find(":", passwd_pos);
+        if (host_pos != std::string::npos)
+        {
+            hostname = uri.substr(passwd_pos + 1, host_pos - passwd_pos - 1);
+
+            std::size_t port_pos = uri.find("/", host_pos);
             if (port_pos != std::string::npos)
             {
-                port_ = atoi(uri.substr(ip_pos + 1, port_pos - ip_pos).c_str());
+                port_ = atoi(uri.substr(host_pos + 1, port_pos - host_pos).c_str());
                 dbnum_ = atoi(uri.substr(port_pos + 1, uri.size() - port_pos).c_str());
             }
             else
             {
-                port_ = atoi(uri.substr(ip_pos + 1, uri.size() - ip_pos).c_str());
+                port_ = atoi(uri.substr(host_pos + 1, uri.size() - host_pos).c_str());
             }
         }
         else
         {
-            ip_pos = uri.find("/", passwd_pos);
-            if (ip_pos != std::string::npos){
-                ip_ = uri.substr(passwd_pos + 1, ip_pos - passwd_pos - 1);
-                dbnum_ = atoi(uri.substr(ip_pos + 1, uri.size() - ip_pos).c_str());
+            host_pos = uri.find("/", passwd_pos);
+            if (host_pos != std::string::npos){
+                hostname = uri.substr(passwd_pos + 1, host_pos - passwd_pos - 1);
+                dbnum_ = atoi(uri.substr(host_pos + 1, uri.size() - host_pos).c_str());
             }
             else{
-                ip_ = uri.substr(passwd_pos + 1, uri.size() - passwd_pos - 1);
+                hostname = uri.substr(passwd_pos + 1, uri.size() - passwd_pos - 1);
             }
+        }
+
+        std::vector<std::string> ip_list = ip_utils::v4::get_ip_list(hostname.c_str());
+        if (!ip_list.empty()) {
+            ip_ = ip_list[0];
+        }
+        else {
+            ip_ = "127.0.0.1";
         }
     }
 

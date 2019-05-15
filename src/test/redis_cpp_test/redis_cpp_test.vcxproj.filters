@@ -30,6 +30,9 @@
     <Filter Include="utils">
       <UniqueIdentifier>{f432f4e4-7df4-49ab-acec-676b979e424d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\redis_cpp\utils">
+      <UniqueIdentifier>{1e3afca5-3994-412e-bf74-0bbb8443f41b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="redis_test.cpp">
@@ -165,6 +168,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\utils\redis_lock.hpp">
       <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\redis_cpp\ip_utils.hpp">
+      <Filter>include\redis_cpp\utils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
