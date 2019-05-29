@@ -292,7 +292,7 @@ protected:
     }
 
     /** default reply handler */
-    void default_reply_handler(redis_reply* reply){
+    void default_reply_handler(redis_reply_ptr reply){
 
     }
 };

@@ -360,9 +360,14 @@ public:
 
         out_result.clear();
         for (int32_t i = 0; i < int32_t(arr.size()) - 1; i = i + 2){
-            out_result.insert(
-                std::move(std::pair<std::string, std::string>(
-                    arr[i].to_string(), arr[i + 1].to_string())));
+            if (!arr[i].is_string() || !arr[i + 1].is_string()) {
+                continue;
+            }
+
+            auto field = arr[i].to_string();
+            auto value = arr[i + 1].to_string();
+
+            out_result.insert(std::pair<std::string, std::string>(field, value));
         }
 
         return next_cursor;

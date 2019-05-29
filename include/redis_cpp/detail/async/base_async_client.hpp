@@ -21,7 +21,7 @@ namespace redis_cpp
 {
 namespace detail
 {
-typedef std::function<void(redis_reply*)> reply_handler;
+typedef std::function<void(redis_reply_ptr)> reply_handler;
 typedef std::function<void(const std::string& channel_name, 
     const std::string& message)> channel_message_handler;
 typedef std::shared_ptr<channel_message_handler> channel_message_handler_ptr;

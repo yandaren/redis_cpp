@@ -50,7 +50,7 @@ public:
     }
 
     /** execute cmd */
-    redis_reply*    do_command(const redis_command& cmd){
+    redis_reply_ptr    do_command(const redis_command& cmd){
         if (!sync_client_){
             return nullptr;
         }
@@ -94,7 +94,7 @@ protected:
             cmd.add_param(param);
         }
 
-        redis_reply* reply = do_command(cmd);
+        redis_reply_ptr reply = do_command(cmd);
         if (!reply || !reply->is_array())
             return false;
 
@@ -116,7 +116,7 @@ protected:
     bool    get_array_result(redis_command& cmd,
         std::vector<std::string>& array_result){
 
-        redis_reply* reply = do_command(cmd);
+        redis_reply_ptr reply = do_command(cmd);
         if (!reply || !reply->is_array())
             return false;
 
@@ -141,7 +141,7 @@ protected:
             cmd.add_param(param);
         }
 
-        redis_reply* reply = do_command(cmd);
+        redis_reply_ptr reply = do_command(cmd);
         if (!reply || !reply->is_integer())
             return 0;
 
@@ -153,7 +153,7 @@ protected:
      */
     int32_t get_integer_result(redis_command& cmd){
 
-        redis_reply* reply = do_command(cmd);
+        redis_reply_ptr reply = do_command(cmd);
         if (!reply || !reply->is_integer())
             return 0;
 
@@ -166,7 +166,7 @@ protected:
      */
     bool get_integer_result(redis_command& cmd, int32_t* out_value){
 
-        redis_reply* reply = do_command(cmd);
+        redis_reply_ptr reply = do_command(cmd);
         if (!reply || !reply->is_integer())
             return false;
 
@@ -182,7 +182,7 @@ protected:
      */
     bool get_float_result(redis_command& cmd, double* out_value){
 
-        redis_reply* reply = do_command(cmd);
+        redis_reply_ptr reply = do_command(cmd);
         if (!reply || !reply->is_string())
             return false;
 
@@ -198,7 +198,7 @@ protected:
      * param out_value - if is not null, store the result
      */
     bool get_string_result(redis_command& cmd, std::string* out_value){
-        redis_reply* reply = do_command(cmd);
+        redis_reply_ptr reply = do_command(cmd);
         if (!reply || !reply->is_string())
             return false;
 
@@ -213,7 +213,7 @@ protected:
      * @brief get string result
      */
     bool get_string_result(redis_command& cmd, std::string& out_value){
-        redis_reply* reply = do_command(cmd);
+        redis_reply_ptr reply = do_command(cmd);
         if (!reply || !reply->is_string())
             return false;
 
@@ -226,7 +226,7 @@ protected:
      * @brief get string result
      */
     std::string get_string_result(redis_command& cmd){
-        redis_reply* reply = do_command(cmd);
+        redis_reply_ptr reply = do_command(cmd);
         if (!reply || !reply->is_string())
             return "";
 
@@ -237,7 +237,7 @@ protected:
      * @brief get bool result
      */
     bool get_boolean_result(redis_command& cmd){
-        redis_reply* reply = do_command(cmd);
+        redis_reply_ptr reply = do_command(cmd);
         if (!reply || !reply->is_integer())
             return false;
 
@@ -250,7 +250,7 @@ protected:
     bool    get_string_pair_result(redis_command& cmd, 
         std::pair<std::string, std::string>& out_value){
         
-        redis_reply* reply = do_command(cmd);
+        redis_reply_ptr reply = do_command(cmd);
         if (!reply || !reply->is_array())
             return false;
 
@@ -272,7 +272,7 @@ protected:
      */
     bool    check_status_ok(redis_command& cmd, bool* has_exception = nullptr){
 
-        redis_reply* reply = do_command(cmd);
+        redis_reply_ptr reply = do_command(cmd);
 
         if (has_exception){
             *has_exception = !reply;
@@ -290,7 +290,7 @@ protected:
      */
     bool    get_array_reply(redis_command& cmd, redis_reply_arr& arr){
 
-        redis_reply* reply = do_command(cmd);
+        redis_reply_ptr reply = do_command(cmd);
         if (!reply || !reply->is_array())
             return false;
 
@@ -315,13 +315,13 @@ protected:
 
         redis_command cmd(scmd);
 
-        if (key && *key){
+        if (key){
             cmd.add_param(key);
         }
 
         cmd.add_param(cursor);
 
-        if (pattern && *pattern){
+        if (pattern){
             cmd.add_param("match");
             cmd.add_param(pattern);
         }
@@ -331,14 +331,14 @@ protected:
             cmd.add_param(*count);
         }
 
-        if (key && *key){
+        if (key){
             hash_slot(key);
         }
         else{
             reset_hash_slot();
         }
 
-        redis_reply* reply = do_command(cmd);
+        redis_reply_ptr reply = do_command(cmd);
         if (!reply || !reply->is_array()){
             return 0;
         }

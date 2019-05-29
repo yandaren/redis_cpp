@@ -151,7 +151,7 @@ public:
 public:
     /** implement of base_sync_client **/
     /** do command */
-    virtual redis_reply* do_command(const redis_command& cmd, int32_t hash_slot) override
+    virtual redis_reply_ptr do_command(const redis_command& cmd, int32_t hash_slot) override
     {
         auto client = get_client_by_slot(hash_slot);
 
@@ -164,7 +164,7 @@ public:
 
         int32_t times = 0;
         while (times++ < max_redirect_times){
-            redis_reply* reply = client->do_command(cmd, hash_slot);
+            redis_reply_ptr reply = client->do_command(cmd, hash_slot);
             if (reply){
                 client->close();
             }

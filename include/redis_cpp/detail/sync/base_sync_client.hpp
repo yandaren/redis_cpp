@@ -28,10 +28,10 @@ public:
 public:
     /** interface **/
     /** do command */
-    virtual redis_reply* do_command(const redis_command& cmd, int32_t hash_slot) = 0;
+    virtual redis_reply_ptr do_command(const redis_command& cmd, int32_t hash_slot) = 0;
     
     /** is cluster mode */
-    virtual bool         cluster_mode() = 0;
+    virtual bool            cluster_mode() = 0;
 };
 }
 }
