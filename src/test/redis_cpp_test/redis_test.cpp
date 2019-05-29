@@ -143,7 +143,7 @@ void redis_parser_test(){
         printf("parse [+OK\\r\\n] failed.\n");
     }
     else{
-        redis_reply* reply = parser.get_reply();
+        redis_reply_ptr reply = parser.transfer_reply();
         printf("reply is [%s]\n", reply->to_string().c_str());
     }
 
@@ -153,7 +153,7 @@ void redis_parser_test(){
         printf("parse [+PONG\\r\\n] failed.\n");
     }
     else{
-        redis_reply* reply = parser.get_reply();
+        redis_reply_ptr reply = parser.transfer_reply();
         printf("reply is [%s]\n", reply->to_string().c_str());
     }
 
@@ -164,7 +164,7 @@ void redis_parser_test(){
         printf("parse [-cluster is down!!!\\r\\n] failed.\n");
     }
     else{
-        redis_reply* reply = parser.get_reply();
+        redis_reply_ptr reply = parser.transfer_reply();
         printf("error reply is [%s]\n", reply->to_error().msg.c_str());
     }
 
@@ -175,7 +175,7 @@ void redis_parser_test(){
         printf("parse [:12456880\\r\\n] failed.\n");
     }
     else{
-        redis_reply* reply = parser.get_reply();
+        redis_reply_ptr reply = parser.transfer_reply();
         printf("integer reply is [%d]\n", reply->to_integer());
     }
 
@@ -186,7 +186,7 @@ void redis_parser_test(){
         printf("parse [$6\\r\\nfoobar\\r\\n] failed.\n");
     }
     else{
-        redis_reply* reply = parser.get_reply();
+        redis_reply_ptr reply = parser.transfer_reply();
         printf("bulk reply is [%s]\n", reply->to_string().c_str());
     }
 
@@ -196,7 +196,7 @@ void redis_parser_test(){
         printf("parse [$0\\r\\n\\r\\n] failed.\n");
     }
     else{
-        redis_reply* reply = parser.get_reply();
+        redis_reply_ptr reply = parser.transfer_reply();
         printf("bulk reply is [%s]\n", reply->to_string().c_str());
     }
 
@@ -206,7 +206,7 @@ void redis_parser_test(){
         printf("parse [$-1\\r\\n] failed.\n");
     }
     else{
-        redis_reply* reply = parser.get_reply();
+        redis_reply_ptr reply = parser.transfer_reply();
         nil_reply& nil = reply->to_nil();
         printf("bulk reply is nil[%d]\n", reply->is_nil());
     }
@@ -222,7 +222,7 @@ void redis_parser_test(){
         printf("parse [$20\\r\\nfuzuotao,you are the best\\r\\n] failed, r: %d\n", r);
     }
     else{
-        redis_reply* reply = parser.get_reply();
+        redis_reply_ptr reply = parser.transfer_reply();
         printf("bulk reply is [%s]\n", reply->to_string().c_str());
     }
 
@@ -266,11 +266,11 @@ void redis_parser_test(){
                       "*0\\r\\n");
     }
     else{
-        redis_reply* reply = parser.get_reply();
+        redis_reply_ptr reply = parser.transfer_reply();
         redis_reply_arr& arr = reply->to_array();
 
         std::vector<int32_t> up_index;
-        print_reply(reply, 0, up_index);
+        print_reply(reply.get(), 0, up_index);
     }
 }
 
@@ -1664,7 +1664,7 @@ void redis_sync_operator_test(){
     //redis_cluster_cmd_test();
 }
 
-void default_reply_handler(redis_cpp::redis_reply* reply){
+void default_reply_handler(redis_cpp::redis_reply_ptr reply){
     printf("default_reply_handler replyed\n");
 }
 
@@ -1899,11 +1899,11 @@ void redis_script_test() {
         args.push_back("second");
 
         printf("a.\n-------------------------------------------\n");
-        redis_cpp::redis_reply* reply = client.eval("return {KEYS[1],KEYS[2],ARGV[1],ARGV[2]}", keys, args);
+        redis_cpp::redis_reply_ptr reply = client.eval("return {KEYS[1],KEYS[2],ARGV[1],ARGV[2]}", keys, args);
         if (reply) {
             std::vector<int32_t> up_index;
             printf("reply content:\n");
-            print_reply(reply);
+            print_reply(reply.get());
         }
         else {
             printf("reply content is nil:\n");
@@ -1938,7 +1938,7 @@ void redis_script_test() {
                     reply = client.evalsha(sha1_list[i].c_str(), keys, keys);
                     if (reply) {
                         printf("reply content:\n");
-                        print_reply(reply);
+                        print_reply(reply.get());
                     }
                 }
             }
@@ -2057,9 +2057,9 @@ void redis_lua_script_test() {
         )=";
 
         std::vector<std::string> args;
-        redis_cpp::redis_reply* reply = client.eval(exist_script.c_str(), keys, args);
+        redis_cpp::redis_reply_ptr reply = client.eval(exist_script.c_str(), keys, args);
 
-        print_reply(reply);
+        print_reply(reply.get());
 
         system("pause");
     }
@@ -2110,6 +2110,61 @@ void domain_connect_test() {
     }
 }
 
+void get_room_list_test() {
+
+    printf("get_room_list_test\n");
+
+    using namespace redis_cpp;
+    using namespace redis_cpp::detail;
+
+    static const std::string room_list_map_name = "room_list_map";
+    int32_t count = 10;
+
+    utility::asio_base::thread_pool pool(2);
+    pool.start();
+
+    std::string redis_uri = "redis://123456@127.0.0.1:7100;redis://123456@127.0.0.1:7101;redis://123456@127.0.0.1:7102";
+
+    cluster_sync_client* sync_client = new cluster_sync_client(redis_uri.c_str(), 5, 20);
+
+    int32_t thread_count = 10;
+    std::thread** thread_pool = new std::thread*[thread_count];
+    for (int32_t i = 0; i < thread_count; i++) {
+        thread_pool[i] = new std::thread([&](){
+            int32_t thread_idx = i;
+            printf("thread[%d] running.\n", thread_idx);
+
+            int32_t idx = 0;
+            int32_t req_count = 0;
+            while (true) {
+                redis_sync_operator client(sync_client);
+
+                idx = !idx;
+                uint64_t cursor = idx * 10;
+
+                std::unordered_map<std::string, std::string> out_result;
+                uint64_t next_cursor = client.hscan(room_list_map_name.c_str(), cursor, out_result, nullptr, &count);
+
+                req_count++;
+
+                if (req_count % 1000 == 0) {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                    printf("thread[%d] req_count : %d\n", thread_idx, req_count);
+                }
+            }
+
+            printf("thread[%d] finished.\n", i);
+        });
+    }
+    
+
+    for (int32_t i = 0; i < thread_count; i++) {
+        if (thread_pool[i]->joinable()) {
+            thread_pool[i]->join();
+        }
+    }
+}
+
 int main()
 {
     std::cout << "redis_cpp test." << std::endl;
@@ -2145,7 +2200,9 @@ int main()
     //redis_key_test();
 
     //domain_test();
-    domain_connect_test();
+    //domain_connect_test();
+
+    get_room_list_test();
 
     system("pause");
     return 0;

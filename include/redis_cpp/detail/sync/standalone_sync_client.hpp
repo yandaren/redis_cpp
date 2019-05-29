@@ -78,7 +78,7 @@ protected:
 public:
     /** interface **/
     /** do command */
-    virtual redis_reply* do_command(const redis_command& cmd, int32_t hash_slot) override
+    virtual redis_reply_ptr do_command(const redis_command& cmd, int32_t hash_slot) override
     {
         std::string str(std::move(cmd.to_string()));
         asio::error_code ec;
@@ -100,7 +100,7 @@ public:
             parse_result result = parser_.parse();
 
             if (result == redis_ok){
-                return parser_.get_reply();
+                return parser_.transfer_reply();
             }
             else if (result == redis_incomplete){
                 // wait for remain content

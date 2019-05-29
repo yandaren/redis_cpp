@@ -191,8 +191,10 @@ public:
         return r;
     }
 
-    redis_reply* get_reply(){
-        return read_ctx_.reply.get();
+    redis_reply_ptr transfer_reply(){
+        redis_reply_ptr ret = read_ctx_.reply;
+        read_ctx_.reply.reset();
+        return ret;
     }
 
 protected:

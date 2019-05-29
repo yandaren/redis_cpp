@@ -139,7 +139,7 @@ public:
 
     /** implement of base_sync_client* /
     /** do command */
-    virtual redis_reply* do_command(const redis_command& cmd, int32_t hash_slot) override
+    virtual redis_reply_ptr do_command(const redis_command& cmd, int32_t hash_slot) override
     {
         standalone_sync_client* client = get_client();
         if (!client){
@@ -148,7 +148,7 @@ public:
             return nullptr;
         }
 
-        redis_reply* reply = client->do_command(cmd, hash_slot);
+        redis_reply_ptr reply = client->do_command(cmd, hash_slot);
         if (reply){
             client->close();
         }

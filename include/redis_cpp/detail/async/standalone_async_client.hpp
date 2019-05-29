@@ -366,7 +366,7 @@ protected:
     }
 
     /** default reply handler */
-    void default_reply_handler(redis_reply* reply){
+    void default_reply_handler(redis_reply_ptr reply){
 
     }
 
@@ -395,7 +395,7 @@ protected:
     }
 
     /** role reply handler */
-    void role_reply_handler(redis_reply* reply){
+    void role_reply_handler(redis_reply_ptr reply){
 
     }
 
@@ -428,7 +428,7 @@ protected:
     }
 
     /** check is channel message */
-    bool    check_ischannel_message(redis_reply* reply){
+    bool    check_ischannel_message(redis_reply_ptr reply){
         if (!reply->is_array()){
             return false;
         }
@@ -475,7 +475,7 @@ protected:
 
     /** process message */
     void    process_message(){
-        redis_reply* reply = parser_.get_reply();
+        redis_reply_ptr reply = parser_.transfer_reply();
 
         if (!reply){
             rds_log_error("[%p] uri[%s] process message reply pointer is null.",

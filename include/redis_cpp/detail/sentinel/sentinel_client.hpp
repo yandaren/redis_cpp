@@ -49,11 +49,11 @@ protected:
     void get_master_address_reply_handler(
         std::string master_name,
         std::weak_ptr<utility::sync::promise_once<std::tuple<bool, std::string, int32_t>>> proms,
-        redis_cpp::redis_reply* reply)
+        redis_cpp::redis_reply_ptr reply)
     {
         std::string uri_str = uri_string();
         rds_log_info("sentinel_client[%p] uri[%s] get master[%s] address reply[%p]",
-            this, uri_str.c_str(), master_name.c_str(), reply);
+            this, uri_str.c_str(), master_name.c_str(), reply.get());
 
         bool success = false;
         std::string ip;
@@ -168,7 +168,7 @@ protected:
     /** 
      * @brief sentinel_default_reply_handler
      */
-    void    sentinel_default_reply_handler(redis_reply* reply)
+    void    sentinel_default_reply_handler(redis_reply_ptr reply)
     {
         rds_log_info("sentinel_client[%p] uri[%s] sentinel_default_reply_handler.",
             this, uri_string().c_str());

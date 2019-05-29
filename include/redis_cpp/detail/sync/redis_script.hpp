@@ -58,7 +58,7 @@ public:
     * @param args:   the args
     * @return redis_reply
     */
-    redis_reply* eval(const char* script, const std::vector<std::string>& keys, const std::vector<std::string>& args)
+    redis_reply_ptr eval(const char* script, const std::vector<std::string>& keys, const std::vector<std::string>& args)
     {
         redis_command cmd("eval");
 
@@ -139,7 +139,7 @@ public:
      * @param args:   the args
      * @return redis_reply
      */
-    redis_reply* evalsha(const char* sha1, const std::vector<std::string>& keys, const std::vector<std::string>& args) {
+    redis_reply_ptr evalsha(const char* sha1, const std::vector<std::string>& keys, const std::vector<std::string>& args) {
         redis_command cmd("evalsha");
 
         cmd.add_param(sha1);

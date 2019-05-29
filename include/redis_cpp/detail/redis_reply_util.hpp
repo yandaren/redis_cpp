@@ -22,7 +22,7 @@ namespace detail
 namespace reply_util
 {
     /** parser cluster slots */
-    static bool parser_cluster_slots(redis_reply* reply, 
+    static bool parser_cluster_slots(redis_reply_ptr reply, 
         slot_range_map_type& map){
 
         if (!reply || !reply->is_array()){

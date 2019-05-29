@@ -34,7 +34,7 @@ public:
         redis_command cmd("cluster");
         cmd.add_param("slots");
 
-        redis_reply* reply = do_command(cmd);
+        redis_reply_ptr reply = do_command(cmd);
         return reply_util::parser_cluster_slots(reply, map);
     }
 };
