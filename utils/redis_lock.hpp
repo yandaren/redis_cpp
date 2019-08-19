@@ -85,7 +85,7 @@ public:
         keys.push_back(m_lock_key);
         args.push_back(m_lock_requestor_id);
         auto reply  = m_redis_op->eval(del_lock_script.c_str(), keys, args);
-        return reply && reply->to_integer() == 1;
+        return reply && reply->is_integer() && reply->to_integer() == 1;
     }
 };
 
