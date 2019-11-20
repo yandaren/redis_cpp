@@ -72,6 +72,8 @@ public:
     {
         redis_command cmd("time");
 
+        hash_slot("time");
+
         redis_reply_arr arr;
         if (!get_array_reply(cmd, arr))
             return false;
