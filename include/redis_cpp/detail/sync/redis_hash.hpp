@@ -41,7 +41,7 @@ public:
 
         hash_slot(key);
 
-        return get_integer_result(cmd);
+        return (int32_t)get_integer_result(cmd);
     }
 
     /**
@@ -58,7 +58,7 @@ public:
 
         hash_slot(key);
 
-        return get_integer_result(cmd, fields);
+        return (int32_t)get_integer_result(cmd, fields);
     }
 
     /**
@@ -116,7 +116,7 @@ public:
 
         hash_slot(key);
 
-        return get_integer_result(cmd);
+        return (int32_t)get_integer_result(cmd);
     }
 
     /**
@@ -136,7 +136,7 @@ public:
 
         hash_slot(key);
 
-        return get_integer_result(cmd);
+        return (int32_t)get_integer_result(cmd);
     }
 
     /**
@@ -287,7 +287,7 @@ public:
 
         hash_slot(key);
 
-        return get_integer_result(cmd);
+        return (int32_t)get_integer_result(cmd);
     }
 
     /**

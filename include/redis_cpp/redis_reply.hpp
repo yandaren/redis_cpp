@@ -53,7 +53,7 @@ typedef std::vector<redis_reply>     redis_reply_arr;
 class redis_reply
 {
 protected:
-    mpark::variant<nil_reply, error_reply, int32_t, std::string, redis_reply_arr> content_;
+    mpark::variant<nil_reply, error_reply, int64_t, std::string, redis_reply_arr> content_;
 public:
     redis_reply() : content_(nil_reply()){
     }
@@ -61,7 +61,7 @@ public:
     redis_reply(error_reply& error) : content_(error){
     }
 
-    redis_reply(int32_t i) : content_(i){
+    redis_reply(int64_t i) : content_(i){
     }
 
     redis_reply(std::string& s) : content_(s){
@@ -105,8 +105,12 @@ public:
         return mpark::get<error_reply>(content_);
     }
 
-    int32_t to_integer(){
-        return mpark::get<int32_t>(content_);
+	int64_t to_integer(){
+        return mpark::get<int64_t>(content_);
+    }
+
+    int32_t to_integer_32() {
+        return (int32_t)mpark::get<int64_t>(content_);
     }
 
     std::string& to_string(){

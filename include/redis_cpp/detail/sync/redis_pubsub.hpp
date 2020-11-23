@@ -76,7 +76,7 @@ public:
 
         if (arr.size() == 2)
         {
-            out_subscriber_count = arr[1].to_integer();
+            out_subscriber_count = arr[1].to_integer_32();
         }
 
         return true;
@@ -135,7 +135,7 @@ public:
 
         reset_hash_slot();
 
-        return get_integer_result(cmd);
+        return (int32_t)get_integer_result(cmd);
     }
 
     /**
@@ -153,7 +153,7 @@ public:
 
         reset_hash_slot();
 
-        return get_integer_result(cmd);
+        return (int32_t)get_integer_result(cmd);
     }
 
     /**
@@ -173,7 +173,7 @@ public:
 
         reset_hash_slot();
 
-        return get_integer_result(cmd);
+        return (int32_t)get_integer_result(cmd);
     }
 };
 }
