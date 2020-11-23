@@ -183,7 +183,7 @@ public:
 
         hash_slot(key);
 
-        return get_integer_result(cmd);
+        return (int32_t)get_integer_result(cmd);
     }
 
     /**
@@ -208,7 +208,7 @@ public:
 
         hash_slot(key);
 
-        return get_integer_result(cmd);
+        return (int32_t)get_integer_result(cmd);
     }
 
     /**
@@ -224,7 +224,7 @@ public:
 
         hash_slot(key);
 
-        return get_integer_result(cmd);
+        return (int32_t)get_integer_result(cmd);
     }
 
     /**
@@ -258,7 +258,7 @@ public:
 
         hash_slot(key);
 
-        return get_integer_result(cmd);
+        return (int32_t)get_integer_result(cmd);
     }
 
     /**
@@ -276,7 +276,7 @@ public:
 
         hash_slot(key);
 
-        return get_integer_result(cmd);
+        return (int32_t)get_integer_result(cmd);
     }
 
     /**
@@ -293,7 +293,7 @@ public:
 
         hash_slot(key);
 
-        return get_integer_result(cmd, values);
+        return (int32_t)get_integer_result(cmd, values);
     }
 
     /**
@@ -312,7 +312,7 @@ public:
 
         hash_slot(key);
 
-        return get_integer_result(cmd);
+        return (int32_t)get_integer_result(cmd);
     }
 
     /**
@@ -357,7 +357,7 @@ public:
 
         hash_slot(key);
 
-        return get_integer_result(cmd);
+        return (int32_t)get_integer_result(cmd);
     }
 
     /**
@@ -453,7 +453,7 @@ public:
 
         hash_slot(key);
 
-        return get_integer_result(cmd);
+        return (int32_t)get_integer_result(cmd);
     }
 
     /**
@@ -471,7 +471,7 @@ public:
 
         hash_slot(key);
 
-        return get_integer_result(cmd);
+        return (int32_t)get_integer_result(cmd);
     }
 
     /**
@@ -488,7 +488,7 @@ public:
 
         hash_slot(key);
 
-        return get_integer_result(cmd, values);
+        return (int32_t)get_integer_result(cmd, values);
     }
 
     /**
@@ -507,7 +507,7 @@ public:
 
         hash_slot(key);
 
-        return get_integer_result(cmd);
+        return (int32_t)get_integer_result(cmd);
     }
 };
 }

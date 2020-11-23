@@ -47,8 +47,8 @@ namespace reply_util
             }
 
             slot_range_info rang_info;
-            rang_info.start_slot = node_detail[0].to_integer();
-            rang_info.end_slot = node_detail[1].to_integer();
+            rang_info.start_slot = node_detail[0].to_integer_32();
+            rang_info.end_slot = node_detail[1].to_integer_32();
             redis_reply_arr& master_detail = node_detail[2].to_array();
             if (master_detail.size() < 2 ||
                 !master_detail[0].is_string() ||
@@ -57,7 +57,7 @@ namespace reply_util
             }
 
             rang_info.master.ip = master_detail[0].to_string();
-            rang_info.master.port = master_detail[1].to_integer();
+            rang_info.master.port = master_detail[1].to_integer_32();
 
             for (std::size_t i = 3; i < node_detail.size(); ++i){
                 if (!node_detail[i].is_array()){
@@ -74,7 +74,7 @@ namespace reply_util
                 rang_info.slave_list.resize(rang_info.slave_list.size() + 1);
                 auto& slave_address = rang_info.slave_list.back();
                 slave_address.ip = slave_detail[0].to_string();
-                slave_address.port = slave_detail[1].to_integer();
+                slave_address.port = slave_detail[1].to_integer_32();
             }
 
             map.insert(std::make_pair(

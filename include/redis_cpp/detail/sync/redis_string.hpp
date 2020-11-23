@@ -41,7 +41,7 @@ public:
 
         hash_slot(key);
 
-        return get_integer_result(cmd);
+        return (int32_t)get_integer_result(cmd);
     }
 
     /**
@@ -117,7 +117,7 @@ public:
 
         hash_slot(key);
 
-        return get_integer_result(cmd);
+        return (int32_t)get_integer_result(cmd);
     }
 
     /**
@@ -134,7 +134,7 @@ public:
 
         hash_slot(key);
 
-        return get_integer_result(cmd);
+        return (int32_t)get_integer_result(cmd);
     }
 
     /**
@@ -271,7 +271,7 @@ public:
     * @param key
     * @return the new value
     */
-    int32_t incr(const char* key)
+    int64_t incr(const char* key)
     {
         redis_command cmd("incr");
 
@@ -297,7 +297,7 @@ public:
 
         hash_slot(key);
 
-        return get_integer_result(cmd);
+        return (int32_t)get_integer_result(cmd);
     }
 
     /**
@@ -669,7 +669,7 @@ public:
 
         hash_slot(key);
 
-        return get_integer_result(cmd);
+        return (int32_t)get_integer_result(cmd);
     }
 
     /**
@@ -689,7 +689,7 @@ public:
 
         hash_slot(key);
 
-        return get_integer_result(cmd);
+        return (int32_t)get_integer_result(cmd);
     }
 
     /**
@@ -711,7 +711,7 @@ public:
 
         hash_slot(key);
 
-        return get_integer_result(cmd);
+        return (int32_t)get_integer_result(cmd);
     }
 
     /**
@@ -727,7 +727,7 @@ public:
 
         hash_slot(key);
 
-        return get_integer_result(cmd);
+        return (int32_t)get_integer_result(cmd);
     }
 
 protected:

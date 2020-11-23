@@ -145,13 +145,13 @@ protected:
         if (!reply || !reply->is_integer())
             return 0;
 
-        return reply->to_integer();
+        return reply->to_integer_32();
     }
 
     /** 
      * @brief get integer result
      */
-    int32_t get_integer_result(redis_command& cmd){
+    int64_t get_integer_result(redis_command& cmd){
 
         redis_reply_ptr reply = do_command(cmd);
         if (!reply || !reply->is_integer())
@@ -171,7 +171,7 @@ protected:
             return false;
 
         if (out_value){
-            *out_value = reply->to_integer();
+            *out_value = reply->to_integer_32();
         }
         return true;
     }

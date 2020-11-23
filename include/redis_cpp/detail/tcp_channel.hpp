@@ -298,6 +298,8 @@ public:
 protected:
 
     void start_receive(){
+        std::lock_guard<std::mutex> locker(mtx_);
+
         socket_.async_read_some(asio::buffer(recv_buffer, max_receiver_buffer_len),
                                 strand_.wrap(std::bind(&tcp_async_channel::async_receive_handler,
                                                         shared_from_this(),

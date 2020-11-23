@@ -125,7 +125,7 @@ public:
 
         exists_list.clear();
         for (int32_t i = 0; i < (int32_t)arr.size(); ++i) {
-            int32_t exist = arr[i].to_integer();
+            int32_t exist = arr[i].to_integer_32();
             exists_list.push_back(!!exist);
         }
 

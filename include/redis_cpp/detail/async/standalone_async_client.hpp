@@ -449,12 +449,12 @@ protected:
             return true;
         }
         else if (cmd == "subscribe" && arr[2].is_integer()){
-            int32_t channel_count = arr[2].to_integer();
+            int32_t channel_count = arr[2].to_integer_32();
             rds_log_info("async_client[%p] cur channel:%d after subscribe[%s].",
                 this, channel_count, channel_name.c_str());
         }
         else if (cmd == "unsubscribe" && arr[2].is_integer()){
-            int32_t channel_count = arr[2].to_integer();
+            int32_t channel_count = arr[2].to_integer_32();
             rds_log_info("async_client[%p] cur channel:%d after usubscribe[%s].",
                 this, channel_count, channel_name.c_str());
         }

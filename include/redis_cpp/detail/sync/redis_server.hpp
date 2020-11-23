@@ -156,7 +156,7 @@ protected:
             return false;
 
         role_info.master = std::make_shared<master_node_info>();
-        role_info.master->replication_offset = arr[1].to_integer();
+        role_info.master->replication_offset = arr[1].to_integer_32();
 
         if (arr.size() < 3 || !arr[2].is_array())
             return true;
@@ -192,9 +192,9 @@ protected:
 
         role_info.slave = std::make_shared<slave_node_info>();
         role_info.slave->master_ip = arr[1].to_string();
-        role_info.slave->master_port = arr[2].to_integer();
+        role_info.slave->master_port = arr[2].to_integer_32();
         role_info.slave->state = arr[3].to_string();
-        role_info.slave->recved_data_size = arr[4].to_integer();
+        role_info.slave->recved_data_size = arr[4].to_integer_32();
         return true;
     }
 
